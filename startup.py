@@ -1,10 +1,7 @@
 """
-startup.py — Körs automatiskt när appen startar på Railway.
-Hämtar de senaste V85-omgångarna om databasen är tom.
+startup.py — Körs vid start. Väntar tills DB är redo innan Flask tar emot requests.
 """
-import os, sys, logging
-from pathlib import Path
-
+import logging
 log = logging.getLogger(__name__)
 
 def init_db_if_empty():
@@ -16,13 +13,10 @@ def init_db_if_empty():
 
         if count == 0:
             log.info("Databasen är tom — hämtar V85-historik...")
+            # Kör SYNKRONT (inte i bakgrundstråd) så DB är klar när Flask startar
             hamta_all_historik()
-            log.info("Klar!")
+            log.info("Historik klar!")
         else:
             log.info(f"Databasen har redan {count} omgångar.")
     except Exception as e:
         log.error(f"startup fel: {e}")
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
-    init_db_if_empty()

@@ -10,14 +10,12 @@ from datetime import date
 app = Flask(__name__)
 DB_PATH = Path(os.environ.get("DB_PATH", str(Path(__file__).parent / "v85.db")))
 
-# Auto-init vid Railway-start
-def _auto_init():
-    try:
-        from startup import init_db_if_empty
-        init_db_if_empty()
-    except Exception as e:
-        print(f"Auto-init: {e}")
-threading.Thread(target=_auto_init, daemon=True).start()
+# Kör DB-init synkront vid start (undviker database is locked)
+try:
+    from startup import init_db_if_empty
+    init_db_if_empty()
+except Exception as e:
+    print(f"Auto-init: {e}")
 
 def q(sql, params=()):
     conn = get_db(DB_PATH)
