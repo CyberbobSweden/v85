@@ -1,0 +1,8 @@
+v85.db
+v85.db-wal
+v85.db-shm
+__pycache__/
+*.pyc
+*.pyo
+.env
+atg_debug.py
