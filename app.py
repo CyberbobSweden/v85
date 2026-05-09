@@ -1024,6 +1024,74 @@ def api_ai_system():
         "hist_omgangar": hist_tot.get(1, 0),
     })
 
+
+@app.route("/api/exportera-xml", methods=["POST"])
+def api_exportera_xml():
+    """
+    Genererar ATG-kompatibel XML-fil för filinlämning.
+    Format: ATG File Betting XSD ver 1.8
+    """
+    from flask import Response
+    from datetime import date, datetime
+    import xml.etree.ElementTree as ET
+
+    data      = request.json
+    kuponger  = data.get("kuponger", [])   # [{kupong:1, lopp:{1:{hastar:[1,3]}, ...}}]
+    speltyp   = data.get("speltyp", "V85") # V85
+    speldatum = data.get("datum", str(date.today()))
+    max_hastar = int(data.get("max_hastar", 15))  # max startnr i loppen
+
+    now = datetime.now()
+
+    # Rot-element
+    root = ET.Element("issuer")
+    root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
+    root.set("xsi:noNamespaceSchemaLocation",
+             "https://www.atg.se/services/schemas/filebet/1.8.2/atg_filebetting.xsd")
+    root.set("company", "Cyberbob V85")
+    root.set("product", "CyberbobV85")
+    root.set("version", "1.0")
+    root.set("createddate", now.strftime("%Y-%m-%d"))
+    root.set("createdtime", now.strftime("%H:%M:%S"))
+    root.set("schemaversion", "ATG File Betting XSD ver 1.8")
+
+    betcoupons = ET.SubElement(root, "betcoupons")
+
+    for k in kuponger:
+        kupong_nr = k.get("kupong", 1)
+        lopp_data = k.get("lopp", {})
+
+        # Kupongelement: v85Coupon
+        coupon_el = ET.SubElement(betcoupons, "v85Coupon")
+        coupon_el.set("couponid", str(kupong_nr))
+        coupon_el.set("date", speldatum)
+        coupon_el.set("betmultiplier", "1")
+
+        for leg in range(1, 9):
+            leg_str   = str(leg)
+            leg_data  = lopp_data.get(leg_str, {})
+            valda     = set(leg_data.get("hastar", []))
+
+            # Bygg marks-sträng: position i = häst nr i (1-indexerat)
+            marks = ""
+            for nr in range(1, max_hastar + 1):
+                marks += "1" if nr in valda else "0"
+
+            leg_el = ET.SubElement(coupon_el, "leg")
+            leg_el.set("legno", str(leg))
+            leg_el.set("marks", marks)
+
+    # Generera XML-sträng
+    ET.indent(root, space="  ")
+    xml_str = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(root, encoding="unicode")
+
+    filename = f"V85_{speldatum}_Cyberbob.xml"
+    return Response(
+        xml_str,
+        mimetype="application/xml",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
 if __name__ == "__main__":
     print("\n  V85 Statistik · http://localhost:5000\n")
     app.run(debug=True, port=5000)

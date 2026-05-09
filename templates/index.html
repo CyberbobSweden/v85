@@ -1285,7 +1285,18 @@ async function laddaAI(){
     html += `</tbody></table></div>`;
   }
 
-  html += `<div style="font-size:.72rem;color:var(--muted);margin-top:10px;line-height:1.6">
+  // Spara kuponger för export
+  window._aiKuponger = d.kuponger;
+  window._aiDatum    = d.datum;
+
+  html += `<div style="display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap">
+    <button onclick="exporteraXML(window._aiKuponger, window._aiDatum)"
+      style="background:var(--green);color:#0a0c0f;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.8rem;padding:9px 18px;cursor:pointer">
+      📥 Ladda ned ATG XML-fil
+    </button>
+    <span style="font-size:.7rem;color:var(--muted)">Ladda upp på atg.se → Spela reducerat → Filinlämning</span>
+  </div>
+  <div style="font-size:.72rem;color:var(--muted);margin-top:10px;line-height:1.6">
     💡 <strong>AI-poäng</strong> = kombination av ATG live-% och historisk vinstfrekvens per rank.<br>
     <strong>Balanserad:</strong> 50% ATG + 50% historik &nbsp;|&nbsp;
     <strong>Säker:</strong> 70% ATG + 30% historik &nbsp;|&nbsp;
@@ -1342,6 +1353,44 @@ function laddaTips(){
   </div></div>`;
 
   document.getElementById('tipsContent').innerHTML = html;
+}
+
+// ── ATG XML-EXPORT ────────────────────────────────────────
+async function exporteraXML(kuponger, datum){
+  if(!kuponger || !kuponger.length){
+    alert('Bygg ett system först!');
+    return;
+  }
+
+  // Räkna ut max startnummer
+  let maxNr = 15;
+  for(const k of kuponger){
+    for(const ld of Object.values(k.lopp||{})){
+      const hastar = ld.hastar || [];
+      if(hastar.length) maxNr = Math.max(maxNr, ...hastar);
+    }
+  }
+
+  const res = await fetch('/api/exportera-xml', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      kuponger,
+      speltyp: 'V85',
+      datum: datum || new Date().toISOString().slice(0,10),
+      max_hastar: maxNr
+    })
+  });
+
+  if(!res.ok){ alert('Kunde inte generera XML-fil'); return; }
+
+  const blob = await res.blob();
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `V85_${datum||'system'}_Cyberbob.xml`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 // ── HÄMTA ──// ── AI-SYSTEM ──────────────────────────────────────────────
@@ -1409,7 +1458,18 @@ async function laddaAI(){
     html += `</tbody></table></div>`;
   }
 
-  html += `<div style="font-size:.72rem;color:var(--muted);margin-top:10px;line-height:1.6">
+  // Spara kuponger för export
+  window._aiKuponger = d.kuponger;
+  window._aiDatum    = d.datum;
+
+  html += `<div style="display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap">
+    <button onclick="exporteraXML(window._aiKuponger, window._aiDatum)"
+      style="background:var(--green);color:#0a0c0f;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.8rem;padding:9px 18px;cursor:pointer">
+      📥 Ladda ned ATG XML-fil
+    </button>
+    <span style="font-size:.7rem;color:var(--muted)">Ladda upp på atg.se → Spela reducerat → Filinlämning</span>
+  </div>
+  <div style="font-size:.72rem;color:var(--muted);margin-top:10px;line-height:1.6">
     💡 <strong>AI-poäng</strong> = kombination av ATG live-% och historisk vinstfrekvens per rank.<br>
     <strong>Balanserad:</strong> 50% ATG + 50% historik &nbsp;|&nbsp;
     <strong>Säker:</strong> 70% ATG + 30% historik &nbsp;|&nbsp;
@@ -1466,6 +1526,44 @@ function laddaTips(){
   </div></div>`;
 
   document.getElementById('tipsContent').innerHTML = html;
+}
+
+// ── ATG XML-EXPORT ────────────────────────────────────────
+async function exporteraXML(kuponger, datum){
+  if(!kuponger || !kuponger.length){
+    alert('Bygg ett system först!');
+    return;
+  }
+
+  // Räkna ut max startnummer
+  let maxNr = 15;
+  for(const k of kuponger){
+    for(const ld of Object.values(k.lopp||{})){
+      const hastar = ld.hastar || [];
+      if(hastar.length) maxNr = Math.max(maxNr, ...hastar);
+    }
+  }
+
+  const res = await fetch('/api/exportera-xml', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      kuponger,
+      speltyp: 'V85',
+      datum: datum || new Date().toISOString().slice(0,10),
+      max_hastar: maxNr
+    })
+  });
+
+  if(!res.ok){ alert('Kunde inte generera XML-fil'); return; }
+
+  const blob = await res.blob();
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `V85_${datum||'system'}_Cyberbob.xml`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 // ── HÄMTA ─────────────────────────────────────────────────
