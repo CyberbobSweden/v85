@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>V85 Statistik · ATG Live</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -9,7 +9,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
 nav{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 20px 0;position:sticky;top:0;z-index:50}
-.nav-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.nav-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:2px;color:var(--accent)}.logo span{color:var(--text)}
 .badge{background:var(--accent2);color:#fff;font-size:.6rem;font-weight:600;letter-spacing:1.5px;padding:3px 8px;border-radius:2px;text-transform:uppercase}
 .live{display:flex;align-items:center;gap:5px;font-size:.7rem;font-weight:500;color:var(--green);letter-spacing:1px;text-transform:uppercase}
@@ -36,7 +36,7 @@ main{padding:16px;max-width:1100px;margin:0 auto}
 .svalue{font-family:'Bebas Neue',sans-serif;font-size:1.75rem;line-height:1}.ssub{font-size:.67rem;color:var(--muted);margin-top:3px}
 
 /* TABLES */
-.tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:auto;margin-bottom:16px;-webkit-overflow-scrolling:touch}
+.tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px}
 table{width:100%;border-collapse:collapse;font-size:.78rem}
 thead th{background:var(--hi);color:var(--muted);font-size:.61rem;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:8px 10px;text-align:left}
 thead th.r{text-align:right}
@@ -79,7 +79,7 @@ tbody tr:hover td{background:var(--hi)}
 .lopp-btn.active{background:var(--accent);border-color:var(--accent);color:#0a0c0f}
 
 /* FILTER */
-.filter-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:14px;row-gap:8px}
+.filter-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:16px}
 .filter-label{font-size:.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
 select{background:var(--hi);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-family:'DM Sans',sans-serif;font-size:.76rem;cursor:pointer}
 
@@ -120,80 +120,1497 @@ select{background:var(--hi);color:var(--text);border:1px solid var(--border);bor
 .tag-v{background:rgba(46,204,113,.15);color:var(--green);border:1px solid rgba(46,204,113,.3)}
 .tag-a{background:rgba(232,124,46,.15);color:var(--accent2);border:1px solid rgba(232,124,46,.3)}
 .pct-bar{display:inline-block;height:6px;background:var(--accent);border-radius:2px;vertical-align:middle;margin-right:4px}
-/* ── RESPONSIVITET ────────────────────────────────────────── */
 
-/* Tablet */
+/* ── MOBILRESPONSIVT ──────────────────────────────────── */
 @media(max-width:768px){
-  .two-col{grid-template-columns:1fr}
-  .three-col{grid-template-columns:1fr 1fr}
-  .cgrid{grid-template-columns:1fr}
+  .two-col,.three-col,.cgrid{grid-template-columns:1fr}
   .system-grid{grid-template-columns:repeat(4,1fr)}
-  main{padding:12px 10px}
-  thead th, tbody td{padding:6px 8px}
+  main{padding:10px}
 }
-
-/* Mobil */
 @media(max-width:540px){
-  /* Header */
-  nav{padding:10px 12px 0}
+  nav{padding:9px 11px 0}
   .logo{font-size:1.6rem}
-  .nav-top{gap:8px;margin-bottom:8px}
-  .nav-right{flex-wrap:wrap;gap:5px}
-  .nav-right input[type=date]{width:130px;font-size:.7rem;padding:5px 6px}
-  .btn{font-size:.7rem;padding:6px 10px}
-  
-  /* Tabs - scroll horisontellt */
+  .nav-top{gap:7px}
+  .nav-right{gap:4px}
+  input[type=date]{width:120px;font-size:.68rem}
+  .btn{font-size:.68rem;padding:5px 9px}
   .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
-  .tab{font-size:.65rem;padding:7px 10px;white-space:nowrap}
-
-  /* Grid */
-  .grid{grid-template-columns:repeat(2,1fr);gap:8px}
-  .summary-grid{grid-template-columns:repeat(2,1fr);gap:8px}
-  .two-col,.three-col,.cgrid{grid-template-columns:1fr}
-  .system-grid{grid-template-columns:repeat(2,1fr);gap:6px}
-  
-  /* Siffror */
-  .svalue{font-size:1.4rem}
-  .sys-rader{font-size:1.6rem}
-  
-  /* Tabeller - horisontell scroll */
+  .tab{font-size:.63rem;padding:7px 9px;white-space:nowrap}
+  .grid,.summary-grid{grid-template-columns:repeat(2,1fr);gap:7px}
+  .system-grid{grid-template-columns:repeat(2,1fr);gap:5px}
   .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  table{min-width:480px;font-size:.72rem}
-  thead th, tbody td{padding:6px 7px}
-  
-  /* Lopp-analys */
-  .lopp-picker{gap:4px}
-  .lopp-btn{font-size:.9rem;padding:6px 10px}
-  .filter-bar{gap:6px;padding:8px 10px}
-  .filter-bar select, .filter-bar input{font-size:.72rem;padding:4px 7px}
-  
-  /* Race-block */
-  .race-hdr{padding:8px 10px}
-  
-  /* Bar-rader */
-  .bar-label{width:80px;font-size:.68rem}
-  .bar-label.w{width:100px}
-  
-  /* Systembyggare */
-  .sys-lopp{padding:8px}
-  .sys-horse{font-size:.65rem}
-  
-  /* Huvudinnehåll */
-  main{padding:10px 8px}
-  .sec{font-size:.85rem;margin:12px 0 8px}
-  .info{font-size:.72rem;padding:8px 12px}
-
-  /* Siffrorna i system-grid */
-  .sys-lopp-title{font-size:.85rem}
+  table{min-width:400px}
+  .lopp-btn{font-size:.88rem;padding:6px 10px}
+  .filter-bar{padding:7px 9px;gap:6px;row-gap:6px}
+  select{font-size:.68rem}
+  main{padding:8px}
+  .bar-label{width:80px;font-size:.67rem}
 }
-
-/* Liten mobil */
 @media(max-width:360px){
   .grid{grid-template-columns:1fr}
-  .summary-grid{grid-template-columns:1fr}
-  .system-grid{grid-template-columns:repeat(2,1fr)}
   .logo{font-size:1.3rem}
-  .tab{font-size:.6rem;padding:6px 8px}
 }
+
 </style>
+</head>
+<body>
+<nav>
+  <div class="nav-top">
+    <div class="logo">V<span>85</span></div>
+    <div class="badge">ATG Live</div>
+    <div class="live"><div class="dot"></div>Riktig data</div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div style="text-align:right;line-height:1.3">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;color:var(--accent)">CYBERBOB</div>
+        <div style="font-size:.58rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase">V85 Analytics</div>
+      </div>
+      <div class="nav-right">
+        <input type="date" id="fetchDate">
+        <button class="btn" id="fetchBtn" onclick="triggerFetch()" title="Hämta en specifik lördags V85-data och lägg till i databasen">⬇ Hämta ny omgång</button>
+        <button class="btn ghost" onclick="location.reload()">↺</button>
+      </div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="goto('dashboard')">Dashboard</button>
+    <button class="tab" onclick="goto('omgangar')">Omgångar</button>
+    <button class="tab" onclick="goto('loppanalys')">Loppanalys</button>
+    <button class="tab" onclick="goto('systembyggare')">Systembyggare</button>
+    <button class="tab" onclick="goto('systemforslag')">Systemförslag</button>
+    <button class="tab" onclick="goto('kommande')">🏇 Kommande V85</button>
+    <button class="tab" onclick="goto('ai')">🤖 AI-System</button>
+    <button class="tab" onclick="goto('tips')">🔗 Tips & Länkar</button>
+    <button class="tab" onclick="goto('statistik')">Utdelningar</button>
+  </div>
+</nav>
+<main>
+
+<!-- ══ DASHBOARD ══════════════════════════════════════════ -->
+<div class="page active" id="page-dashboard">
+  <div class="grid" id="summaryGrid"><div class="loading"><div class="spin"></div></div></div>
+  <div class="two-col">
+    <div class="ccrd"><div class="ctitle">Vanligaste vinnarnummer (alla lopp)</div><div id="numChart"></div></div>
+    <div class="ccrd"><div class="ctitle">Bästa kuskar — V85-segrar</div><div id="kuskChart"></div></div>
+  </div>
+  <div class="ccrd" style="margin-bottom:16px"><div class="ctitle">Utdelning 8/8 över tid</div><div id="utdChart"></div></div>
+  <div class="sec">Banstatistik</div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Bana</th><th>Omg.</th><th class="r">Snitt 8/8</th><th class="r">Högst 8/8</th><th class="r">Snitt omsättning</th></tr></thead>
+    <tbody id="banorBody"></tbody>
+  </table></div>
+</div>
+
+<!-- ══ OMGÅNGAR ═══════════════════════════════════════════ -->
+<div class="page" id="page-omgangar">
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Datum</th><th>V.</th><th>Bana</th><th>Status</th><th class="r">8/8 utd.</th><th class="r">Vinnare</th><th class="r">7/8 utd.</th><th class="r">Omsättning</th><th></th></tr></thead>
+    <tbody id="omgangarBody"></tbody>
+  </table></div>
+</div>
+
+<!-- ══ OMGÅNG DETALJ ══════════════════════════════════════ -->
+<div class="page" id="page-detalj">
+  <button class="btn ghost sm" style="margin-bottom:14px" onclick="goto('omgangar')">← Tillbaka</button>
+  <div id="detaljContent"><div class="loading"><div class="spin"></div></div></div>
+</div>
+
+<!-- ══ LOPPANALYS ═════════════════════════════════════════ -->
+<div class="page" id="page-loppanalys">
+  <div class="info">Välj ett loppnummer (1–8) och filtrera på distans och startmetod för att se detaljerad historikstatistik.</div>
+
+  <div class="lopp-picker" id="loppPicker">
+    <span style="font-size:.7rem;color:var(--muted);align-self:center;letter-spacing:1px;text-transform:uppercase">Lopp:</span>
+    <button class="lopp-btn active" onclick="valjLopp(1)">L1</button>
+    <button class="lopp-btn" onclick="valjLopp(2)">L2</button>
+    <button class="lopp-btn" onclick="valjLopp(3)">L3</button>
+    <button class="lopp-btn" onclick="valjLopp(4)">L4</button>
+    <button class="lopp-btn" onclick="valjLopp(5)">L5</button>
+    <button class="lopp-btn" onclick="valjLopp(6)">L6</button>
+    <button class="lopp-btn" onclick="valjLopp(7)">L7</button>
+    <button class="lopp-btn" onclick="valjLopp(8)">L8</button>
+  </div>
+
+  <div class="filter-bar">
+    <span class="filter-label">Distans:</span>
+    <select id="filterDistans" onchange="laddaLoppAnalys()"><option value="">Alla</option></select>
+    <span class="filter-label" style="margin-left:10px">Startmetod:</span>
+    <select id="filterStartmetod" onchange="laddaLoppAnalys()">
+      <option value="">Alla</option>
+      <option value="volte">Volt</option>
+      <option value="autostart">Auto</option>
+    </select>
+    <span id="loppTotal" style="margin-left:auto;font-size:.72rem;color:var(--muted)"></span>
+  </div>
+
+  <div id="loppAnalysContent"><div class="loading"><div class="spin"></div>Laddar analys…</div></div>
+</div>
+
+<!-- ══ SYSTEMBYGGARE ══════════════════════════════════════ -->
+<div class="page" id="page-systembyggare">
+  <div class="info">Baserat på historisk vinnarprocent för varje odds-rangordnad häst per lopp. Kryssa i de hästar du vill ha med i ditt system.</div>
+  <div id="systemContent"><div class="loading"><div class="spin"></div>Laddar systemdata…</div></div>
+</div>
+
+<!-- ══ SYSTEMFÖRSLAG ════════════════════════════════════════ -->
+<div class="page" id="page-systemforslag">
+  <div class="info">Ange din budget och pris per rad — Cyberbob räknar ut ett statistikoptimerat system.</div>
+  <div class="filter-bar">
+    <span class="filter-label">Budget:</span>
+    <input type="number" id="sfBudget" value="200" min="10" step="50"
+      style="background:var(--hi);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px 10px;width:100px;font-family:'DM Sans',sans-serif;font-size:.76rem">
+    <span class="filter-label" style="margin-left:4px">kr &nbsp;</span>
+    <span class="filter-label" style="margin-left:8px">Pris/rad:</span>
+    <select id="sfPris" style="background:var(--hi);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-size:.76rem">
+      <option value="0.5">0,50 kr</option>
+      <option value="1">1 kr</option>
+      <option value="4">4 kr</option>
+    </select>
+    <button class="btn" onclick="laddaSystemforslag()" style="margin-left:10px">Beräkna system</button>
+  </div>
+  <div id="sfContent"><div class="info">Fyll i budget och klicka Beräkna.</div></div>
+</div>
+
+<!-- ══ KOMMANDE V85 ═════════════════════════════════════════ -->
+<div class="page" id="page-kommande">
+  <div class="info" id="kommInfo">Laddar kommande V85...</div>
+  <div id="kommFilter" style="display:none">
+    <div class="filter-bar">
+      <span class="filter-label" style="color:var(--accent);font-weight:700;font-size:.85rem;letter-spacing:1px">V86</span>
+      <span class="filter-label">Budget:</span>
+      <input type="number" id="kommBudget" value="200" min="10" step="50"
+        style="background:var(--hi);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px 10px;width:90px;font-family:'DM Sans',sans-serif;font-size:.76rem">
+      <span class="filter-label" style="margin-left:2px">kr</span>
+      <select id="kommPris" style="background:var(--hi);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-size:.76rem;margin-left:6px">
+        <option value="0.5">0,50 kr/rad</option>
+        <option value="1">1 kr/rad</option>
+        <option value="4">4 kr/rad</option>
+      </select>
+      <span class="filter-label" style="margin-left:10px">Kuponger:</span>
+      <select id="kommKuponger" style="background:var(--hi);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-size:.76rem">
+        <option value="1">1 kupong</option>
+        <option value="2" selected>2 kuponger</option>
+        <option value="3">3 kuponger</option>
+        <option value="4">4 kuponger</option>
+      </select>
+      <button class="btn" onclick="beraknaKommSystem()" style="margin-left:10px">Bygg system</button>
+      <button class="btn ghost" onclick="laddaKommande()" style="margin-left:6px">↺ Uppdatera %</button>
+      <span id="kommTid" style="margin-left:auto;font-size:.7rem;color:var(--muted)"></span>
+    </div>
+  </div>
+  <div id="kommReducerat" style="display:none;margin-bottom:16px"></div>
+  <div id="kommSystem" style="display:none;margin-bottom:16px"></div>
+  <div id="kommContent"><div class="loading"><div class="spin"></div>Hämtar V85-data från ATG...</div></div>
+</div>
+
+<!-- ══ AI-SYSTEM ═════════════════════════════════════════════ -->
+<div class="page" id="page-ai">
+  <div class="info">AI:n kombinerar live ATG-spelprocent med historisk vinststatistik och bygger ett optimerat system automatiskt.</div>
+  <div class="filter-bar">
+    <span class="filter-label">Budget:</span>
+    <input type="number" id="aiBudget" value="200" min="10" step="50"
+      style="background:var(--hi);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px 10px;width:90px;font-family:'DM Sans',sans-serif;font-size:.76rem">
+    <span class="filter-label" style="margin-left:4px">kr</span>
+    <select id="aiPris" style="background:var(--hi);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-size:.76rem;margin-left:8px">
+      <option value="0.5">0,50 kr/rad</option>
+      <option value="1">1 kr/rad</option>
+      <option value="4">4 kr/rad</option>
+    </select>
+    <select id="aiKuponger" style="background:var(--hi);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-size:.76rem;margin-left:8px">
+      <option value="1">1 kupong</option>
+      <option value="2" selected>2 kuponger</option>
+      <option value="3">3 kuponger</option>
+    </select>
+    <select id="aiStrategi" style="background:var(--hi);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-size:.76rem;margin-left:8px">
+      <option value="balanserad">⚖️ Balanserad</option>
+      <option value="säker">🛡️ Säker (favoriter)</option>
+      <option value="värde">💎 Värde (chans/odds)</option>
+    </select>
+    <button class="btn" onclick="laddaAI()" style="margin-left:10px">🤖 Bygg AI-system</button>
+  </div>
+  <div id="aiContent"><div class="info">Klicka "Bygg AI-system" för att generera ett system för kommande V85.</div></div>
+</div>
+
+<!-- ══ TIPS & LÄNKAR ═══════════════════════════════════════ -->
+<div class="page" id="page-tips">
+  <div id="tipsContent"></div>
+</div>
+
+<!-- ══ STATISTIK/UTDELNINGAR ══════════════════════════════ -->
+<div class="page" id="page-statistik">
+  <div class="sec">Alla utdelningar</div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Datum</th><th>Bana</th><th class="r">8/8 utd.</th><th class="r">8/8 vinn.</th><th class="r">7/8 utd.</th><th class="r">6/8 utd.</th><th>Jackpot 5/8</th><th class="r">Omsättning</th></tr></thead>
+    <tbody id="utdBody"></tbody>
+  </table></div>
+</div>
+
+</main>
+<script>
+{% raw %}
+// ── Hjälpfunktioner ───────────────────────────────────────
+const fmt = n => n==null?'—':n>=1e6?(n/1e6).toFixed(2).replace('.',',')+' Mkr':n>=1000?Math.round(n/1000)+' tkr':Math.round(n)+' kr';
+const fmtKr = n => n==null?'—':Math.round(n).toLocaleString('sv-SE')+' kr';
+const pct = n => n==null?'—':n.toFixed(1)+'%';
+const bar = (p, color='var(--accent)', maxP=100) =>
+  `<div class="bar-bg"><div class="bar-fill" style="width:${Math.min(p/maxP*100,100)}%;background:${color}"></div></div>`;
+const konSv = k => ({mare:'Sto',stallion:'Hingst',gelding:'Valack',horse:'Häst'}[k]||k||'—');
+
+// ── NAV ───────────────────────────────────────────────────
+let loadedTabs = new Set();
+function goto(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active',['dashboard','omgangar','loppanalys','systembyggare','systemforslag','kommande','ai','tips','statistik'][i]===p);
+  });
+  if(!loadedTabs.has(p)){
+    loadedTabs.add(p);
+    if(p==='omgangar') loadOmgangar();
+    if(p==='loppanalys'){ laddaFilterOptions(); laddaLoppAnalys(); }
+    if(p==='systembyggare') laddaSystembyggare();
+    if(p==='systemforslag') laddaSystemforslag();
+    if(p==='kommande') laddaKommande();
+    if(p==='ai') laddaAI();
+    if(p==='tips') laddaTips();
+    if(p==='statistik') loadStatistik();
+  }
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────
+async function loadDashboard(){
+  const s = await fetch('/api/summary').then(r=>r.json()).catch(()=>({}));
+  document.getElementById('summaryGrid').innerHTML = `
+    <div class="scard y"><div class="slabel">Omgångar</div><div class="svalue">${s.total||0}</div><div class="ssub">i databasen</div></div>
+    <div class="scard o"><div class="slabel">Snitt 8/8</div><div class="svalue" style="font-size:1.2rem">${fmt(s.snitt)}</div><div class="ssub">per rätt rad</div></div>
+    <div class="scard g"><div class="slabel">Högst 8/8</div><div class="svalue" style="font-size:1.2rem">${fmt(s.max_utd)}</div></div>
+    <div class="scard b"><div class="slabel">Snitt oms.</div><div class="svalue" style="font-size:1.2rem">${fmt(s.snitt_oms)}</div></div>
+    <div class="scard r"><div class="slabel">Jackpottar</div><div class="svalue">${s.jackpots||0}</div><div class="ssub">5/8 utan vinnare</div></div>
+  `;
+
+  const [nums, kuskar, utds, banor] = await Promise.all([
+    fetch('/api/statistik/startnummer').then(r=>r.json()).catch(()=>[]),
+    fetch('/api/statistik/kuskar').then(r=>r.json()).catch(()=>[]),
+    fetch('/api/statistik/utdelningar').then(r=>r.json()).catch(()=>[]),
+    fetch('/api/statistik/banor').then(r=>r.json()).catch(()=>[]),
+  ]);
+
+  const numEl = document.getElementById('numChart');
+  if(nums.length){
+    const mx = nums[0].vinster;
+    numEl.innerHTML = nums.map(r=>`<div class="bar-row">
+      <div class="bar-label">Nr ${r.startnr}</div>
+      ${bar(r.vinster, 'var(--green)', mx)}
+      <div class="bar-val">${r.vinster}×</div>
+    </div>`).join('');
+  } else numEl.innerHTML='<p style="color:var(--muted);font-size:.8rem">Hämta data för statistik</p>';
+
+  const kEl = document.getElementById('kuskChart');
+  if(kuskar.length){
+    const mx = kuskar[0].vinster;
+    kEl.innerHTML = kuskar.slice(0,10).map(r=>`<div class="bar-row">
+      <div class="bar-label w">${r.kusk}</div>
+      ${bar(r.vinster, 'var(--accent)', mx)}
+      <div class="bar-val">${r.vinster}×</div>
+    </div>`).join('');
+  } else kEl.innerHTML='<p style="color:var(--muted);font-size:.8rem">Ingen kuskdata</p>';
+
+  const utdEl = document.getElementById('utdChart');
+  const vals = utds.map(r=>r.utdelning_8).filter(Boolean).reverse();
+  const dates = utds.map(r=>r.datum).reverse();
+  if(vals.length>1){
+    const mn=Math.min(...vals), mx=Math.max(...vals);
+    const W=800,H=100,pad=10;
+    const x=i=>pad+(i/(vals.length-1))*(W-2*pad);
+    const y=v=>H-pad-((v-mn)/(mx-mn||1))*(H-2*pad);
+    const pts=vals.map((v,i)=>`${x(i)},${y(v)}`).join(' ');
+    const area=`M${x(0)},${H} `+vals.map((v,i)=>`L${x(i)},${y(v)}`).join(' ')+` L${x(vals.length-1)},${H} Z`;
+    utdEl.innerHTML=`
+      <div style="font-size:.7rem;color:var(--muted);margin-bottom:6px">${dates[0]} → ${dates[dates.length-1]} · ${vals.length} omgångar</div>
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:100px">
+        <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#f5c842" stop-opacity=".2"/><stop offset="100%" stop-color="#f5c842" stop-opacity="0"/>
+        </linearGradient></defs>
+        <path d="${area}" fill="url(#g)"/>
+        <polyline points="${pts}" fill="none" stroke="#f5c842" stroke-width="1.5" stroke-linejoin="round"/>
+        ${vals.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="3.5" fill="${v===mx?'#f5c842':'#161a21'}" stroke="#f5c842" stroke-width="1.5"><title>${dates[i]}: ${fmtKr(v)}</title></circle>`).join('')}
+      </svg>
+      <div style="display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted);margin-top:3px;font-family:'DM Mono',monospace"><span>${fmtKr(mn)}</span><span>Max: ${fmtKr(mx)}</span></div>`;
+  } else utdEl.innerHTML='<p style="color:var(--muted);font-size:.8rem;padding:8px 0">Hämta fler omgångar för trend</p>';
+
+  document.getElementById('banorBody').innerHTML = banor.length
+    ? banor.map(r=>`<tr>
+        <td>${r.bana||'—'}</td><td class="mono">${r.omgangar}</td>
+        <td class="r mono ${r.snitt_utd>5e5?'big':r.snitt_utd>2e5?'mid':'low'}">${fmt(r.snitt_utd)}</td>
+        <td class="r mono big">${fmt(r.max_utd)}</td>
+        <td class="r mono">${fmt(r.snitt_oms)}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="5" style="color:var(--muted);padding:14px">Ingen data</td></tr>';
+}
+
+// ── OMGÅNGAR ──────────────────────────────────────────────
+async function loadOmgangar(){
+  const rows = await fetch('/api/omgangar?limit=60').then(r=>r.json()).catch(()=>[]);
+  document.getElementById('omgangarBody').innerHTML = rows.length
+    ? rows.map(r=>{
+        const cls = r.utdelning_8>1e6?'big':r.utdelning_8>3e5?'mid':'low';
+        const sc = r.status==='results'?'bd':r.status==='active'?'ba':'bu';
+        return `<tr>
+          <td class="mono">${r.datum}</td><td class="mono">${r.vecka||'—'}</td>
+          <td>${r.bana||'—'}</td>
+          <td><span class="badge2 ${sc}">${{results:'Klar',active:'Aktiv',upcoming:'Kommande'}[r.status]||r.status}</span></td>
+          <td class="r mono ${cls}">${fmtKr(r.utdelning_8)}</td>
+          <td class="r mono">${r.vinnare_8??'—'}</td>
+          <td class="r mono">${fmtKr(r.utdelning_7)}</td>
+          <td class="r mono">${fmt(r.omsattning)}</td>
+          <td><button class="btn ghost sm" onclick="showDetalj('${r.id}')">Visa →</button></td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="9" style="color:var(--muted);text-align:center;padding:20px">Kör python fetch.py för att hämta data</td></tr>';
+}
+
+async function showDetalj(id){
+  goto('detalj'); loadedTabs.add('detalj');
+  document.getElementById('detaljContent').innerHTML='<div class="loading"><div class="spin"></div></div>';
+  const d = await fetch('/api/omgang/'+encodeURIComponent(id)).then(r=>r.json()).catch(()=>null);
+  if(!d){document.getElementById('detaljContent').innerHTML='<div class="err">Kunde inte ladda.</div>';return;}
+
+  let html=`<div class="grid">
+    <div class="scard y"><div class="slabel">Bana</div><div class="svalue" style="font-size:1.1rem">${d.bana||'—'}</div><div class="ssub">${d.datum}</div></div>
+    <div class="scard o"><div class="slabel">Omsättning</div><div class="svalue" style="font-size:1.1rem">${fmt(d.omsattning)}</div></div>
+    <div class="scard g"><div class="slabel">System</div><div class="svalue" style="font-size:1.2rem">${d.system_count?d.system_count.toLocaleString('sv-SE'):'—'}</div></div>
+    ${d.utdelning_8?`<div class="scard b"><div class="slabel">8/8 utdelning</div><div class="svalue" style="font-size:1.1rem">${fmtKr(d.utdelning_8)}</div><div class="ssub">${d.vinnare_8} vinnare</div></div>`:''}
+    ${d.utdelning_7?`<div class="scard r"><div class="slabel">7/8 utdelning</div><div class="svalue" style="font-size:1.1rem">${fmtKr(d.utdelning_7)}</div><div class="ssub">${d.vinnare_7} vinnare</div></div>`:''}
+  </div>`;
+
+  for(const l of (d.lopp||[])){
+    const struktna = JSON.parse(l.struktna||'[]');
+    html+=`<div style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:8px 8px 0 0;padding:9px 13px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--accent);width:26px">L${l.nummer}</div>
+        <div style="flex:1">
+          <div style="font-weight:500;font-size:.86rem">${l.namn||'Lopp '+l.nummer}</div>
+          <div style="font-size:.68rem;color:var(--muted);font-family:'DM Mono',monospace">${l.distans||'—'}m · ${(l.starttid||'—').slice(11,16)} · <span class="tag ${l.startmetod==='volte'?'tag-v':'tag-a'}">${l.startmetod||'—'}</span></div>
+        </div>
+        ${l.vinnare_namn?`<div style="font-size:.76rem;text-align:right"><div style="color:var(--accent);font-weight:500">🏆 Nr ${l.vinnare_nr} ${l.vinnare_namn}</div><div style="color:var(--muted)">${l.vinnare_kusk||''}</div></div>`:''}
+      </div>
+      <div class="tbl-wrap" style="border-radius:0 0 8px 8px;margin-bottom:0">
+      <table><thead><tr><th>#</th><th>Häst</th><th>Kusk</th><th>Ålder/Kön</th><th>Rekord</th><th>Res.</th></tr></thead><tbody>
+      ${(l.hastar||[]).map(h=>{
+        const s=struktna.includes(h.startnr);
+        return `<tr class="${h.v85_vinnare?'win-row':''}" style="${s?'opacity:.35':''}">
+          <td class="mono" style="font-weight:600">${h.startnr}</td>
+          <td style="font-weight:500">${h.namn}${s?' <span style="color:var(--red);font-size:.62rem">STRUKEN</span>':''}</td>
+          <td style="font-size:.72rem;color:var(--muted)">${h.kusk||'—'}</td>
+          <td style="font-size:.72rem;color:var(--muted)">${h.alder||'—'}år ${konSv(h.kon)}</td>
+          <td class="mono" style="font-size:.7rem;color:var(--blue)">${h.rekord||'—'}</td>
+          <td>${h.v85_vinnare?'<span style="color:var(--accent);font-weight:600">🏆 V85</span>':'—'}</td>
+        </tr>`;
+      }).join('')}
+      </tbody></table></div></div>`;
+  }
+  html+=`<div class="src"><div class="sdot"></div>${d.id}</div>`;
+  document.getElementById('detaljContent').innerHTML=html;
+}
+
+// ── LOPPANALYS ────────────────────────────────────────────
+let aktivtLopp = 1;
+let filterOptions = {distanser:[], startmetoder:[]};
+
+async function laddaFilterOptions(){
+  const data = await fetch('/api/analys/filter-options').then(r=>r.json()).catch(()=>({distanser:[],startmetoder:[]}));
+  filterOptions = data;
+  uppdateraDistansFilter();
+}
+
+function uppdateraDistansFilter(){
+  const sel = document.getElementById('filterDistans');
+  const gam = sel.value;
+  sel.innerHTML = '<option value="">Alla distanser</option>';
+  const dist = filterOptions.distanser.filter(d=>d.nummer===aktivtLopp);
+  dist.forEach(d=>{
+    const o = document.createElement('option');
+    o.value = d.distans; o.textContent = `${d.distans}m (${d.n} lopp)`;
+    sel.appendChild(o);
+  });
+  sel.value = gam;
+}
+
+function valjLopp(nr){
+  aktivtLopp = nr;
+  document.querySelectorAll('.lopp-btn').forEach((b,i)=>b.classList.toggle('active',i===nr-1));
+  uppdateraDistansFilter();
+  laddaLoppAnalys();
+}
+
+async function laddaLoppAnalys(){
+  const distans = document.getElementById('filterDistans')?.value || '';
+  const startmetod = document.getElementById('filterStartmetod')?.value || '';
+  const el = document.getElementById('loppAnalysContent');
+  el.innerHTML = '<div class="loading"><div class="spin"></div>Laddar…</div>';
+
+  let url = `/api/analys/lopp/${aktivtLopp}`;
+  const p = new URLSearchParams();
+  if(distans) p.append('distans', distans);
+  if(startmetod) p.append('startmetod', startmetod);
+  if(p.toString()) url += '?'+p.toString();
+
+  const d = await fetch(url).then(r=>r.json()).catch(()=>null);
+  if(!d){el.innerHTML='<div class="err">Kunde inte ladda analys.</div>';return;}
+
+  document.getElementById('loppTotal').textContent = `${d.totalt_lopp} lopp analyserade`;
+
+  if(d.totalt_lopp === 0){
+    el.innerHTML='<div class="info">Inga lopp hittades med dessa filter. Prova att hämta fler omgångar.</div>';
+    return;
+  }
+
+  const maxVinster = Math.max(...d.startnummer.map(r=>r.vinster||0), 1);
+  const maxRankVinster = Math.max(...d.odds_rank.map(r=>r.vinster||0), 1);
+
+  let html = `<div class="two-col">`;
+
+  // STARTNUMMER
+  html += `<div class="ccrd"><div class="ctitle">Startnummer — vinstfrekvens</div>
+    <table style="width:100%;font-size:.76rem"><thead><tr><th>#</th><th>Starter</th><th>Vinster</th><th>%</th><th style="width:80px"></th></tr></thead><tbody>
+    ${d.startnummer.map(r=>{
+      const p2 = r.vinstprocent||0;
+      const col = p2>25?'var(--accent)':p2>15?'var(--green)':'var(--blue)';
+      return `<tr>
+        <td class="mono" style="font-weight:600">${r.startnr}</td>
+        <td class="mono">${r.starter}</td>
+        <td class="mono" style="color:${r.vinster>0?'var(--green)':'var(--muted)'}">${r.vinster||0}</td>
+        <td class="mono" style="color:${col};font-weight:${p2>20?600:400}">${pct(p2)}</td>
+        <td>${bar(p2,''+col, Math.max(...d.startnummer.map(x=>x.vinstprocent||0)))}</td>
+      </tr>`;
+    }).join('')}
+    </tbody></table></div>`;
+
+  // ODDS-RANGORDNING
+  html += `<div class="ccrd"><div class="ctitle">Odds-rangordning — vinnaren var rank X</div>
+    <div class="info" style="margin-bottom:10px;font-size:.7rem">Rank 1 = lägst odds (favorit), rank 2 = näst lägst odds osv.</div>
+    ${d.odds_rank.map(r=>{
+      const p2 = r.vinstprocent||0;
+      const col = r.odds_rank===1?'var(--accent)':r.odds_rank<=3?'var(--green)':'var(--blue)';
+      return `<div class="bar-row">
+        <div class="bar-label">Rank ${r.odds_rank}${r.odds_rank===1?' ★':''}</div>
+        ${bar(p2, col, Math.max(...d.odds_rank.map(x=>x.vinstprocent||0)))}
+        <div class="bar-val">${pct(p2)}</div>
+        <div class="bar-val2">${r.vinster}/${r.lopp_totalt}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+
+  html += `</div><div class="three-col">`;
+
+  // KÖN
+  html += `<div class="ccrd"><div class="ctitle">Kön — vinstprocent</div>
+    ${d.kon_stat.map(r=>{
+      const p2 = r.vinstprocent||0;
+      return `<div class="bar-row">
+        <div class="bar-label">${konSv(r.kon)}</div>
+        ${bar(p2,'var(--purple)',Math.max(...d.kon_stat.map(x=>x.vinstprocent||0)))}
+        <div class="bar-val">${pct(p2)}</div>
+        <div class="bar-val2">${r.vinster}/${r.starter}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+
+  // ÅLDER
+  html += `<div class="ccrd"><div class="ctitle">Ålder — vinstprocent</div>
+    ${d.alder_stat.map(r=>{
+      const p2 = r.vinstprocent||0;
+      return `<div class="bar-row">
+        <div class="bar-label">${r.alder} år</div>
+        ${bar(p2,'var(--accent2)',Math.max(...d.alder_stat.map(x=>x.vinstprocent||0)))}
+        <div class="bar-val">${pct(p2)}</div>
+        <div class="bar-val2">${r.vinster}/${r.starter}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+
+  // DISTANS/STARTMETOD
+  html += `<div class="ccrd">
+    <div class="ctitle">Distanser i detta lopp</div>
+    ${d.distanser.map(r=>`<div class="bar-row">
+      <div class="bar-label">${r.distans}m</div>
+      ${bar(r.n,'var(--blue)',Math.max(...d.distanser.map(x=>x.n)))}
+      <div class="bar-val">${r.n}×</div>
+    </div>`).join('')}
+    <div class="divider"></div>
+    <div class="ctitle">Startmetod</div>
+    ${d.startmetoder.map(r=>`<div class="bar-row">
+      <div class="bar-label"><span class="tag ${r.startmetod==='volte'?'tag-v':'tag-a'}">${r.startmetod==='volte'?'Volt':'Auto'}</span></div>
+      ${bar(r.n,'var(--green)',Math.max(...d.startmetoder.map(x=>x.n)))}
+      <div class="bar-val">${r.n}×</div>
+    </div>`).join('')}
+  </div>`;
+
+  html += `</div>`;
+
+  // KUSKAR
+  html += `<div class="sec">Bästa kuskar i lopp ${aktivtLopp}</div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Kusk</th><th class="r">Segrar</th><th class="r">Starter</th><th class="r">Vinstprocent</th><th></th></tr></thead><tbody>
+    ${d.kuskar.map(r=>{
+      const p2 = r.vinstprocent||0;
+      return `<tr>
+        <td style="font-weight:500">${r.kusk}</td>
+        <td class="r mono mid">${r.vinster}</td>
+        <td class="r mono">${r.starter}</td>
+        <td class="r mono" style="color:${p2>20?'var(--accent)':'var(--text)'}">${pct(p2)}</td>
+        <td style="width:100px">${bar(p2,'var(--accent)',Math.max(...d.kuskar.map(x=>x.vinstprocent||0)))}</td>
+      </tr>`;
+    }).join('')}
+    </tbody></table></div>`;
+
+  // KUMULATIV RANK-TÄCKNING
+  if(d.rank_fordelning && d.rank_fordelning.length){
+    const totLopp = d.totalt_lopp;
+    let kum=0;
+    html += `<div class="sec">Kumulativ täckning per rank — lopp ${aktivtLopp}</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Top-N rank</th><th class="r">Individuellt</th><th class="r">Kumulativt</th><th class="r">Vann av ${totLopp}</th><th></th></tr></thead><tbody>`;
+    for(const r of d.rank_fordelning){
+      kum += (r.vann||0);
+      const kumPct = totLopp ? (kum/totLopp*100) : 0;
+      const indPct = r.tot ? ((r.vann||0)/totLopp*100) : 0;
+      const col = kumPct>=90?'var(--green)':kumPct>=70?'var(--accent)':kumPct>=50?'var(--accent2)':'var(--muted)';
+      html += `<tr>
+        <td style="font-weight:600">Top ${r.v85_rank}${r.v85_rank===1?' (favorit)':''}</td>
+        <td class="r mono">${indPct.toFixed(1)}%</td>
+        <td class="r mono" style="color:${col};font-weight:600">${kumPct.toFixed(1)}%</td>
+        <td class="r mono">${kum}/${totLopp}</td>
+        <td style="width:100px">${bar(kumPct,''+col,100)}</td>
+      </tr>`;
+    }
+    html += `</tbody></table></div>`;
+  }
+
+  // SENASTE VINNARE
+  html += `<div class="sec">Senaste vinnare i lopp ${aktivtLopp}</div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Datum</th><th>Bana</th><th>Dist.</th><th>Start</th><th>Rank</th><th>Nr</th><th>Häst</th><th>Kusk</th><th>Fält</th></tr></thead><tbody>
+    ${d.senaste_vinnare.map(r=>`<tr>
+      <td class="mono">${r.datum}</td>
+      <td>${r.bana||'—'}</td>
+      <td class="mono">${r.distans||'—'}m</td>
+      <td><span class="tag ${r.startmetod==='volte'?'tag-v':'tag-a'}">${r.startmetod==='volte'?'Volt':'Auto'}</span></td>
+      <td class="mono" style="color:${r.v85_rank<=3?'var(--accent)':r.v85_rank<=6?'var(--green)':'var(--muted)'};font-weight:600">${r.v85_rank||'—'}</td>
+      <td class="mono" style="font-weight:600">${r.startnr}</td>
+      <td style="font-weight:500">${r.namn}</td>
+      <td style="color:var(--muted);font-size:.73rem">${r.kusk}</td>
+      <td class="mono" style="color:var(--muted)">${r.falt_storlek||'—'}</td>
+    </tr>`).join('')}
+    </tbody></table></div>`;
+
+  el.innerHTML = html;
+}
+
+// ── SYSTEMBYGGARE ─────────────────────────────────────────
+let systemVal = {}; // lopp_nr -> Set av odds_rank
+
+async function laddaSystembyggare(){
+  const el = document.getElementById('systemContent');
+  const data = await fetch('/api/analys/system').then(r=>r.json()).catch(()=>[]);
+  if(!data.length){
+    el.innerHTML='<div class="info">Hämta data med fetch.py för att se systembyggaren.</div>';
+    return;
+  }
+
+  // Organisera per lopp
+  const perLopp = {};
+  for(const r of data){
+    if(!perLopp[r.lopp_nr]) perLopp[r.lopp_nr] = [];
+    perLopp[r.lopp_nr].push(r);
+  }
+
+  // Init selection: rank 1 vald per default
+  for(let l=1;l<=8;l++) systemVal[l] = new Set([1]);
+
+  function renderSystem(){
+    const radCount = Object.values(systemVal).reduce((acc, s)=>acc*(s.size||1), 1);
+
+    // Beräkna täckning per lopp baserat på kumulativ_pct för vald max-rank
+    const tackningPerLopp = {};
+    for(let l=1;l<=8;l++){
+      const sel = systemVal[l];
+      const maxRank = sel.size>0 ? Math.max(...sel) : 0;
+      const loppData = perLopp[l]||[];
+      const kumRow = loppData.find(r=>r.odds_rank===maxRank);
+      tackningPerLopp[l] = kumRow ? kumRow.kumulativ_pct : 0;
+    }
+    const snittTackning = Object.values(tackningPerLopp).reduce((a,b)=>a+b,0)/8;
+
+    let html = `<div class="sys-summary">
+      <div class="sys-sum-title">Ditt system</div>
+      <div style="display:flex;align-items:baseline;gap:16px;flex-wrap:wrap">
+        <div><div class="slabel">Antal rader</div><div class="sys-rader">${radCount.toLocaleString('sv-SE')}</div></div>
+        <div style="font-size:.75rem;color:var(--muted);line-height:1.8">
+          Kostnad à 0,50kr: <strong style="color:var(--text)">${(radCount*0.5).toLocaleString('sv-SE',{minimumFractionDigits:0,maximumFractionDigits:0})} kr</strong><br>
+          Kostnad à 1kr: <strong style="color:var(--text)">${radCount.toLocaleString('sv-SE')} kr</strong><br>
+          Kostnad à 4kr: <strong style="color:var(--text)">${(radCount*4).toLocaleString('sv-SE')} kr</strong>
+        </div>
+        <div style="font-size:.75rem;line-height:1.8">
+          Snitt täckning: <strong style="color:${snittTackning>=70?'var(--green)':snittTackning>=50?'var(--accent)':'var(--red)'}">${snittTackning.toFixed(0)}%</strong>
+        </div>
+      </div>
+      <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px">
+        ${[1,2,3,4,5,6,7,8].map(l=>{
+          const p2 = tackningPerLopp[l]||0;
+          const col = p2>=70?'var(--green)':p2>=50?'var(--accent)':'var(--red)';
+          return `<div style="background:var(--hi);border-radius:5px;padding:5px 10px;font-size:.72rem">
+            L${l}: <span style="color:${col};font-weight:700">${p2.toFixed(0)}%</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="system-grid">`;
+
+    for(let l=1;l<=8;l++){
+      const loppData = perLopp[l]||[];
+      const totalt = loppData[0]?.lopp_totalt||0;
+      html += `<div class="sys-lopp">
+        <div class="sys-lopp-title">Lopp ${l}</div>
+        <div style="font-size:.6rem;color:var(--muted);margin-bottom:6px;letter-spacing:.5px">TÄCKNING OM DU TAR TOP-N</div>`;
+
+      // Snabbvalsknapparna 90%/75%
+      const thresholds = [
+        {label:'≥90%', target:90, col:'var(--green)'},
+        {label:'≥75%', target:75, col:'var(--accent)'},
+        {label:'≥60%', target:60, col:'var(--accent2)'},
+        {label:'Fav', target:0, col:'var(--blue)'},
+      ];
+      html += `<div style="display:flex;gap:3px;margin-bottom:8px;flex-wrap:wrap">`;
+      for(const t of thresholds){
+        let n;
+        if(t.target===0){ n=1; }
+        else {
+          const row = loppData.find(r=>r.kumulativ_pct>=t.target);
+          n = row ? row.odds_rank : loppData.length;
+        }
+        html += `<button onclick="setTopN(${l},${n})" style="background:var(--hi);border:1px solid var(--border);border-radius:4px;color:${t.col};font-size:.62rem;font-weight:600;padding:2px 6px;cursor:pointer;font-family:'DM Sans',sans-serif">${t.label}</button>`;
+      }
+      html += `</div>`;
+
+      // Häst-rader med kumulativ bar
+      loppData.forEach(r=>{
+        const checked = systemVal[l].has(r.odds_rank);
+        const kPct = r.kumulativ_pct||0;
+        const indPct = r.vinstprocent||0;
+        const kCol = kPct>=90?'var(--green)':kPct>=70?'var(--accent)':kPct>=50?'var(--accent2)':'var(--muted)';
+        html += `<div class="sys-horse ${checked?'picked':''}" onclick="toggleSys(${l},${r.odds_rank})"
+          title="Rank ${r.odds_rank}: ${indPct}% individuellt | ${kPct}% kumulativt (top ${r.odds_rank})">
+          <div style="flex:1">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+              <span style="font-size:.68rem">Rank ${r.odds_rank}${r.odds_rank===1?' ★':''}</span>
+              <span style="font-size:.65rem;color:var(--muted)">${indPct.toFixed(0)}%</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:4px">
+              <div style="flex:1;background:var(--border);border-radius:2px;height:5px;overflow:hidden">
+                <div style="width:${Math.min(kPct,100)}%;height:100%;background:${kCol};border-radius:2px"></div>
+              </div>
+              <span style="font-size:.65rem;font-family:'DM Mono',monospace;color:${kCol};font-weight:600;width:32px;text-align:right">${kPct.toFixed(0)}%</span>
+            </div>
+          </div>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+
+    // Beräkna max möjlig täckning (vinnare med v85_rank)
+    const maxTackning = {};
+    for(let l=1;l<=8;l++){
+      const ldata = perLopp[l]||[];
+      const tot = ldata[0]?.lopp_totalt||0;
+      const totVann = ldata.reduce((s,r)=>s+(r.vinster||0),0);
+      maxTackning[l] = tot>0 ? Math.round(totVann/tot*100) : 100;
+    }
+
+    html += `</div>
+    <div class="ccrd" style="margin-top:12px">
+      <div class="ctitle">Max möjlig täckning per lopp (andel av lopp med rankad vinnare)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">
+        ${[1,2,3,4,5,6,7,8].map(l=>{
+          const m = maxTackning[l]||0;
+          return '<div style="background:var(--hi);border-radius:5px;padding:5px 12px;font-size:.72rem">L'+l+': <strong style="color:'+(m>=90?'var(--green)':m>=75?'var(--accent)':'var(--accent2)')+'">'+m+'%</strong></div>';
+        }).join('')}
+      </div>
+      <div style="font-size:.68rem;color:var(--muted);margin-top:8px">
+        Max-täckning &lt; 100% betyder att en del lopp hade vinnare som ATG inte rankade (t.ex. struktna hästar som vann via reservering). 
+        Det är normalt och påverkar inte systemets kvalitet.
+      </div>
+    </div>
+    <div style="font-size:.7rem;color:var(--muted);margin-top:10px">
+      💡 Klicka på en rad för att lägga till/ta bort. Snabbknapparna väljer automatiskt rätt antal hästar.
+    </div>`;
+    el.innerHTML = html;
+  }
+
+  window.toggleSys = function(lopp, rank){
+    if(systemVal[lopp].has(rank)) systemVal[lopp].delete(rank);
+    else systemVal[lopp].add(rank);
+    renderSystem();
+  };
+
+  window.setTopN = function(lopp, n){
+    systemVal[lopp] = new Set(Array.from({length:n},(_,i)=>i+1));
+    renderSystem();
+  };
+
+  renderSystem();
+}
+
+// ── STATISTIK ─────────────────────────────────────────────
+async function loadStatistik(){
+  const rows = await fetch('/api/statistik/utdelningar').then(r=>r.json()).catch(()=>[]);
+  document.getElementById('utdBody').innerHTML = rows.length
+    ? rows.map(r=>{
+        const cls=r.utdelning_8>1e6?'big':r.utdelning_8>3e5?'mid':'low';
+        return `<tr>
+          <td class="mono">${r.datum}</td><td>${r.bana||'—'}</td>
+          <td class="r mono ${cls}">${fmtKr(r.utdelning_8)}</td>
+          <td class="r mono">${r.vinnare_8??'—'}</td>
+          <td class="r mono">${fmtKr(r.utdelning_7)}</td>
+          <td class="r mono">${fmtKr(r.utdelning_6)}</td>
+          <td>${r.jackpot_5?'<span style="color:var(--accent)">★ Jackpot</span>':'—'}</td>
+          <td class="r mono">${fmt(r.omsattning)}</td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="8" style="color:var(--muted);text-align:center;padding:20px">Ingen data</td></tr>';
+}
+
+// ── SYSTEMFÖRSLAG ─────────────────────────────────────────
+async function laddaSystemforslag(){
+  const budget = parseFloat(document.getElementById('sfBudget').value) || 200;
+  const pris   = parseFloat(document.getElementById('sfPris').value) || 0.5;
+  const el = document.getElementById('sfContent');
+  el.innerHTML = '<div class="loading"><div class="spin"></div>Beräknar…</div>';
+
+  const d = await fetch(`/api/analys/systemforslag?budget=${budget}&pris=${pris}`)
+    .then(r=>r.json()).catch(()=>null);
+  if(!d){ el.innerHTML='<div class="err">Kunde inte beräkna system.</div>'; return; }
+
+  const fmtKr2 = n => n==null?'—':n>=1e6?(n/1e6).toFixed(2).replace('.',',')+' Mkr':Math.round(n).toLocaleString('sv-SE')+' kr';
+
+  // Täckningstabell per mål
+  let html = `<div class="sec">System per täckningsmål</div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Täckningsmål</th><th>Hästar per lopp (L1–L8)</th><th class="r">Rader</th><th class="r">Kostnad</th><th>Ryms?</th></tr></thead><tbody>`;
+
+  for(const [mal, sys] of Object.entries(d.system_per_mal).sort((a,b)=>Number(b[0])-Number(a[0]))){
+    const hastar = Object.values(sys.hastar_per_lopp).join(' · ');
+    const ryms = sys.ryms_i_budget;
+    html += `<tr style="${ryms?'':'opacity:.5'}">
+      <td style="font-weight:700;color:${mal>=90?'var(--green)':mal>=75?'var(--accent)':'var(--accent2)'}">${mal}% täckning</td>
+      <td class="mono" style="font-size:.72rem">${hastar}</td>
+      <td class="r mono">${sys.antal_rader.toLocaleString('sv-SE')}</td>
+      <td class="r mono">${fmtKr2(sys.kostnad_50ore)}</td>
+      <td>${ryms?'<span style="color:var(--green)">✓ Ja</span>':'<span style="color:var(--red)">✗ Nej</span>'}</td>
+    </tr>`;
+  }
+  html += `</tbody></table></div>`;
+
+  // Bästa system inom budget
+  if(d.basta_system){
+    const bs = d.basta_system;
+    const hastar = Object.entries(bs.hastar_per_lopp)
+      .map(([l,n])=>`<div style="text-align:center"><div style="font-size:.62rem;color:var(--muted)">L${l}</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--accent)">${n}</div></div>`)
+      .join('');
+
+    html += `<div class="sec">Rekommenderat system (${budget} kr budget)</div>
+    <div class="sys-summary">
+      <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:baseline;margin-bottom:14px">
+        <div><div class="slabel">Rader</div><div class="sys-rader">${bs.antal_rader.toLocaleString('sv-SE')}</div></div>
+        <div><div class="slabel">Kostnad</div><div class="sys-rader" style="font-size:1.4rem;color:var(--green)">${fmtKr2(bs.kostnad)}</div></div>
+        <div><div class="slabel">Snitt täckning</div><div class="sys-rader" style="font-size:1.4rem">${bs.snitt_tackning}%</div></div>
+        <div style="font-size:.72rem;color:var(--muted);align-self:center">Statistisk täckning:<br>rätt häst finns med i<br>${bs.snitt_tackning}% av loppen</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">${hastar}</div>
+
+      ${bs.reducerat ? `
+      <hr style="border:none;border-top:1px solid var(--border);margin:12px 0">
+      <div style="font-size:.7rem;color:var(--muted);margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase">
+        ⚡ Reducerat alternativ (${fmtKr2(bs.reducerat_kostnad)})
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        ${Object.entries(bs.reducerat).map(([l,n])=>`<div style="text-align:center"><div style="font-size:.62rem;color:var(--muted)">L${l}</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--blue)">${n}</div></div>`).join('')}
+      </div>` : ''}
+    </div>`;
+
+    // Kumulativ täckning per lopp i det föreslagna systemet
+    html += `<div class="sec">Historisk täckning per lopp i detta system</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Lopp</th><th class="r">Hästar med</th><th class="r">Kumulativ täckning</th><th class="r">Vann av ${Object.values(d.lopp_analys)[0]?.[0]?.tot||'?'}</th><th></th></tr></thead><tbody>`;
+
+    for(let l=1;l<=8;l++){
+      const n = bs.hastar_per_lopp[l] || 1;
+      const ldata = d.lopp_analys[l] || [];
+      const row = ldata.find(r=>r.rank>=n) || ldata[ldata.length-1];
+      const kpct = row ? row.kum_pct : 0;
+      const col = kpct>=90?'var(--green)':kpct>=70?'var(--accent)':'var(--accent2)';
+      html += `<tr>
+        <td style="font-weight:600">Lopp ${l}</td>
+        <td class="r mono">${n} hästar</td>
+        <td class="r mono" style="color:${col};font-weight:700">${kpct}%</td>
+        <td class="r mono">${row ? row.kum_vann+'/'+row.tot : '—'}</td>
+        <td style="width:100px">${bar(kpct,''+col,100)}</td>
+      </tr>`;
+    }
+    html += `</tbody></table>
+    <div style="font-size:.7rem;color:var(--muted);padding:10px 12px">
+      💡 Statistiken baseras på ${Object.values(d.lopp_analys)[0]?.[0]?.tot||'?'} historiska V85-omgångar. 
+      Täckning = sannolikheten att vinnarhästen finns bland de N högst rankade hästarna.
+      Hög täckning = bättre chans att ha med vinnaren, men fler rader = högre kostnad.
+    </div></div>`;
+  }
+
+  el.innerHTML = html;
+}
+
+// ── KOMMANDE V85 ──────────────────────────────────────────
+let kommData = null;
+let kommABC = {}; // {leg: {nr: 'A'|'B'|'C'}}
+
+let aktivSpeltyp = 'V85';
+
+async function laddaKommande(){
+  const typ = aktivSpeltyp;
+  document.getElementById('kommContent').innerHTML = `<div class="loading"><div class="spin"></div>Hämtar ${typ}-data från ATG...</div>`;
+  document.getElementById('kommFilter').style.display = 'none';
+  document.getElementById('kommSystem').style.display = 'none';
+  kommABC = {};
+
+  const d = await fetch(`/api/kommande?typ=${typ}`).then(r=>r.json()).catch(()=>null);
+  if(!d || d.error){
+    const dag = typ==='V85'?'lördagar':'söndagar';
+    document.getElementById('kommContent').innerHTML = `<div class="err">⚠ ${d?.error || 'Kunde inte hämta data'}</div>
+    <div class="info" style="margin-top:12px">${typ} körs på ${dag}. Prova igen närmre tävlingsdagen då spelprocent finns tillgängliga.</div>`;
+    document.getElementById('kommInfo').textContent = '';
+    return;
+  }
+
+  kommData = d;
+  document.getElementById('kommInfo').textContent = '';
+  document.getElementById('kommFilter').style.display = 'flex';
+  document.getElementById('kommTid').textContent = `Uppdaterad ${new Date().toLocaleTimeString('sv-SE')}`;
+
+  renderKommande();
+}
+
+function renderKommande(){
+  if(!kommData) return;
+  const d = kommData;
+
+  let html = `<div class="grid" style="margin-bottom:16px">
+    <div class="scard y"><div class="slabel">Datum</div><div class="svalue" style="font-size:1.1rem">${d.datum}</div></div>
+    <div class="scard o"><div class="slabel">Bana</div><div class="svalue" style="font-size:1.1rem">${d.bana}</div></div>
+    <div class="scard b"><div class="slabel">Status</div><div class="svalue" style="font-size:1rem">${d.status==='results'?'Avslutad':d.status==='active'?'Pågår':'Kommande'}</div></div>
+  </div>`;
+
+  html += `<div class="info" style="margin-bottom:14px">
+    Markera hästar som <strong style="color:var(--accent)">A</strong> (gardering — alltid med), 
+    <strong style="color:var(--green)">B</strong> (trolig — tas med om budget tillåter) eller 
+    <strong style="color:var(--blue)">C</strong> (möjlig — tas med om mycket budget). 
+    Klicka upprepade gånger för att byta kategori.
+  </div>`;
+
+  for(const lopp of d.lopp){
+    const leg = lopp.leg;
+    const abc = kommABC[leg] || {};
+    const hastar = lopp.hastar.filter(h=>!h.struken);
+    const maxPct = Math.max(...hastar.map(h=>h.sp_pct||0), 1);
+
+    html += `<div class="race-block" style="margin-bottom:14px">
+      <div class="race-hdr" style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:8px 8px 0 0;padding:9px 13px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--accent);width:28px">L${leg}</div>
+        <div style="flex:1">
+          <div style="font-weight:500;font-size:.86rem">${lopp.namn||'Lopp '+leg}</div>
+          <div style="font-size:.68rem;color:var(--muted);font-family:'DM Mono',monospace">${lopp.distans||'—'}m · ${(lopp.starttid||'').slice(11,16)} · <span class="tag ${lopp.startmetod==='volte'?'tag-v':'tag-a'}">${lopp.startmetod==='volte'?'Volt':'Auto'}</span></div>
+        </div>
+        <div style="font-size:.72rem;color:var(--muted)">
+          A: <strong style="color:var(--accent)">${Object.values(abc).filter(v=>v==='A').length}</strong>
+          B: <strong style="color:var(--green)">${Object.values(abc).filter(v=>v==='B').length}</strong>
+          C: <strong style="color:var(--blue)">${Object.values(abc).filter(v=>v==='C').length}</strong>
+        </div>
+      </div>
+      <div class="tbl-wrap" style="border-radius:0 0 8px 8px;margin-bottom:0">
+      <table><thead><tr>
+        <th>Rank</th><th>#</th><th>Häst</th><th>Kusk</th>
+        <th class="r">Odds</th><th class="r" style="min-width:120px">ATG %</th>
+        <th>Kategori</th>
+      </tr></thead><tbody>`;
+
+    for(const h of hastar){
+      const cat = abc[h.nr] || '';
+      const catStyle = cat==='A'?'background:rgba(245,200,66,.2);color:var(--accent);border:1px solid var(--accent)':
+                       cat==='B'?'background:rgba(46,204,113,.15);color:var(--green);border:1px solid var(--green)':
+                       cat==='C'?'background:rgba(74,144,217,.15);color:var(--blue);border:1px solid var(--blue)':
+                       'background:var(--hi);color:var(--muted);border:1px solid var(--border)';
+      const pct = h.sp_pct || 0;
+      const pctCol = pct>30?'var(--accent)':pct>15?'var(--green)':pct>5?'var(--text)':'var(--muted)';
+
+      html += `<tr style="${cat?'background:rgba(255,255,255,.02)':''}">
+        <td class="mono" style="color:var(--muted)">${h.rank||'—'}</td>
+        <td class="mono" style="font-weight:600">${h.nr}</td>
+        <td style="font-weight:500">${h.namn}</td>
+        <td style="font-size:.73rem;color:var(--muted)">${h.kusk||'—'} ${h.alder?h.alder+'år':''} ${konSv(h.kon)}</td>
+        <td class="r mono" style="color:var(--accent)">${h.odds?h.odds.toFixed(1)+'x':'—'}</td>
+        <td class="r">
+          ${pct>0?`<div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+            <div style="width:70px;background:var(--border);border-radius:2px;height:6px;overflow:hidden">
+              <div style="width:${Math.min(pct/maxPct*100,100)}%;height:100%;background:${pctCol};border-radius:2px"></div>
+            </div>
+            <span class="mono" style="color:${pctCol};font-weight:${pct>20?600:400};font-size:.78rem;width:38px;text-align:right">${pct.toFixed(1)}%</span>
+          </div>`:'<span style="color:var(--muted)">—</span>'}
+        </td>
+        <td>
+          <button onclick="setABC(${leg},${h.nr})" 
+            style="padding:3px 10px;border-radius:4px;cursor:pointer;font-size:.72rem;font-weight:700;font-family:'DM Sans',sans-serif;${catStyle}">
+            ${cat||'–'}
+          </button>
+        </td>
+      </tr>`;
+    }
+    html += `</tbody></table></div></div>`;
+  }
+
+  document.getElementById('kommContent').innerHTML = html;
+}
+
+function setABC(leg, nr){
+  if(!kommABC[leg]) kommABC[leg] = {};
+  const curr = kommABC[leg][nr] || '';
+  const next = curr===''?'A':curr==='A'?'B':curr==='B'?'C':'';
+  if(next==='') delete kommABC[leg][nr];
+  else kommABC[leg][nr] = next;
+  renderKommande();
+}
+
+async function beraknaKommSystem(){
+  const budget  = parseFloat(document.getElementById('kommBudget').value)||200;
+  const pris    = parseFloat(document.getElementById('kommPris').value)||0.5;
+  const nKupong = parseInt(document.getElementById('kommKuponger').value)||2;
+  
+  const sysEl = document.getElementById('kommSystem');
+  const redEl = document.getElementById('kommReducerat');
+  sysEl.style.display = 'none';
+  redEl.style.display = 'block';
+  redEl.innerHTML = '<div class="loading" style="padding:10px"><div class="spin"></div>Bygger reducerat system...</div>';
+
+  // Hämta historisk statistik för att visa täckning per rank
+  const statData = await fetch('/api/analys/system').then(r=>r.json()).catch(()=>[]);
+  const statPerLopp = {};
+  for(const r of statData){
+    if(!statPerLopp[r.lopp_nr]) statPerLopp[r.lopp_nr] = [];
+    statPerLopp[r.lopp_nr].push(r);
+  }
+
+  // Bygg reducerat system
+  const res = await fetch('/api/kommande/reducerat', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({budget, pris, abc: kommABC, kuponger: nKupong})
+  }).then(r=>r.json()).catch(()=>null);
+
+  if(!res){ redEl.innerHTML='<div class="err">Kunde inte beräkna system.</div>'; return; }
+
+  const fmtKr2 = n => Math.round(n).toLocaleString('sv-SE')+' kr';
+
+  // Hämta hästar per lopp från kommData för att visa namn
+  const hasterPerLopp = {};
+  if(kommData) {
+    for(const lopp of kommData.lopp){
+      hasterPerLopp[lopp.leg] = lopp.hastar.filter(h=>!h.struken);
+    }
+  }
+
+  function hNamn(leg, nr){
+    const h = (hasterPerLopp[leg]||[]).find(h=>h.nr==nr);
+    return h ? `${nr}. ${h.namn} (${h.sp_pct?h.sp_pct.toFixed(0)+'%':'—'})` : `Nr ${nr}`;
+  }
+
+  function getCat(leg, nr){
+    return (kommABC[leg]||{})[nr] || '';
+  }
+
+  function katFarg(cat){
+    return cat==='A'?'var(--accent)':cat==='B'?'var(--green)':cat==='C'?'var(--blue)':'var(--muted)';
+  }
+
+  // Sammanfattning
+  let html = `<div class="sys-summary" style="margin-bottom:16px">
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:baseline;margin-bottom:12px">
+      <div><div class="slabel">Antal kuponger</div><div class="sys-rader">${res.n_kupong}</div></div>
+      <div><div class="slabel">Total kostnad</div><div class="sys-rader" style="font-size:1.4rem;color:var(--green)">${fmtKr2(res.total_kostnad)}</div></div>
+      <div><div class="slabel">Totalt rader</div><div class="sys-rader" style="font-size:1.4rem">${res.total_rader.toLocaleString('sv-SE')}</div></div>
+      <div><div class="slabel">Budget</div><div class="sys-rader" style="font-size:1.2rem;color:var(--muted)">${fmtKr2(budget)}</div></div>
+    </div>
+    <div class="info" style="margin:0;font-size:.72rem">
+      <strong style="color:var(--accent)">A</strong> = gardering (alltid med i alla kuponger) &nbsp;
+      <strong style="color:var(--green)">B</strong> = troliga (delas mellan kuponger) &nbsp;
+      <strong style="color:var(--blue)">C</strong> = möjliga (tas med i mån av utrymme)
+    </div>
+  </div>`;
+
+  // En kortkarta för alla kuponger
+  html += `<div style="display:grid;grid-template-columns:repeat(${Math.min(res.n_kupong,2)},1fr);gap:12px;margin-bottom:16px">`;
+  
+  for(const kupong of res.kuponger){
+    html += `<div class="ccrd" style="border-color:var(--accent)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--accent)">Kupong ${kupong.kupong}</div>
+        <div style="font-size:.75rem;color:var(--muted)">${kupong.rader.toLocaleString('sv-SE')} rader · ${fmtKr2(kupong.kostnad)}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:10px">`;
+    
+    for(let l=1;l<=8;l++){
+      const ld = kupong.lopp[l]||{};
+      const hastar = ld.hastar||[];
+      html += `<div style="background:var(--hi);border-radius:5px;padding:6px 4px;text-align:center">
+        <div style="font-size:.6rem;color:var(--muted);margin-bottom:3px">L${l}</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--accent)">${hastar.length}</div>
+        <div style="font-size:.58rem;line-height:1.4">
+          ${hastar.map(nr=>{
+            const cat = getCat(l,nr);
+            return `<span style="color:${katFarg(cat)}">${nr}</span>`;
+          }).join(' ')}
+        </div>
+      </div>`;
+    }
+    
+    html += `</div>`;
+    
+    // Visa skillnader från föregående kupong
+    const hasDiff = Object.values(kupong.lopp).some(ld=>ld.diff && (ld.diff.added?.length||ld.diff.removed?.length));
+    if(hasDiff && kupong.kupong > 1){
+      html += `<div style="font-size:.68rem;color:var(--muted);border-top:1px solid var(--border);padding-top:6px">`;
+      for(let l=1;l<=8;l++){
+        const diff = kupong.lopp[l]?.diff;
+        if(diff?.added?.length || diff?.removed?.length){
+          html += `<span style="margin-right:8px">L${l}: `;
+          if(diff.added?.length) html += diff.added.map(n=>`<span style="color:var(--green)">+${n}</span>`).join(' ');
+          if(diff.removed?.length) html += diff.removed.map(n=>`<span style="color:var(--red)">-${n}</span>`).join(' ');
+          html += `</span>`;
+        }
+      }
+      html += `</div>`;
+    }
+    html += `</div>`;
+  }
+  html += `</div>`;
+
+  // Detaljvy per lopp - alla kuponger sida vid sida
+  html += `<div class="sec">Detaljerad systemöversikt</div>
+  <div class="tbl-wrap"><table>
+    <thead><tr>
+      <th>Lopp</th>
+      <th>Hästar (markering)</th>
+      ${res.kuponger.map(k=>`<th class="r">Kupong ${k.kupong}</th>`).join('')}
+      <th class="r">Hist. täckning</th>
+    </tr></thead><tbody>`;
+
+  for(let l=1;l<=8;l++){
+    // Räkna ut historisk täckning baserat på max rank i någon kupong
+    const maxHastar = Math.max(...res.kuponger.map(k=>(k.lopp[l]?.antal||1)));
+    const statRows = statPerLopp[l]||[];
+    const tackning = statRows.find(r=>r.odds_rank>=maxHastar)?.kumulativ_pct || 
+                     (statRows.length ? statRows[statRows.length-1]?.kumulativ_pct : null);
+    const tCol = tackning>=90?'var(--green)':tackning>=70?'var(--accent)':'var(--accent2)';
+
+    // Visa alla märkta hästar
+    const allaNr = new Set();
+    for(const k of res.kuponger) (k.lopp[l]?.hastar||[]).forEach(n=>allaNr.add(n));
+    const markeradeTxt = [...allaNr].sort((a,b)=>a-b).map(nr=>{
+      const cat = getCat(l,nr);
+      const h = (hasterPerLopp[l]||[]).find(h=>h.nr==nr);
+      const pctTxt = h?.sp_pct ? ` ${h.sp_pct.toFixed(0)}%` : '';
+      return `<span style="color:${katFarg(cat)};font-weight:${cat==='A'?700:400}">${nr}${pctTxt}${cat?'('+cat+')':''}</span>`;
+    }).join(' ');
+
+    html += `<tr>
+      <td style="font-weight:600">Lopp ${l}</td>
+      <td style="font-size:.73rem">${markeradeTxt||'—'}</td>
+      ${res.kuponger.map(k=>{
+        const ld = k.lopp[l]||{};
+        const hastar = (ld.hastar||[]).map(nr=>{
+          const cat = getCat(l,nr);
+          return `<span style="color:${katFarg(cat)};font-weight:${cat==='A'?700:400}">${nr}</span>`;
+        }).join(' ');
+        return `<td class="r mono" style="font-size:.75rem">${hastar||'—'} <span style="color:var(--muted)">(${ld.antal||0})</span></td>`;
+      }).join('')}
+      <td class="r mono" style="color:${tCol};font-weight:600">${tackning!=null?tackning+'%':'—'}</td>
+    </tr>`;
+  }
+
+  html += `</tbody></table></div>
+  <div style="font-size:.7rem;color:var(--muted);margin-top:10px">
+    💡 <strong>Tips:</strong> A-hästar är alltid med. B-hästar delas upp mellan kupongerna för att täcka fler kombinationer. 
+    Historisk täckning visar sannolikheten att vinnaren finns bland dina valda hästar, baserat på ${statData.length > 0 ? statData[0]?.lopp_totalt||'?' : '?'} historiska lopp.
+  </div>`;
+
+  redEl.innerHTML = html;
+}
+
+// ── AI-SYSTEM ──────────────────────────────────────────────
+async function laddaAI(){
+  const budget   = parseFloat(document.getElementById('aiBudget').value)||200;
+  const pris     = parseFloat(document.getElementById('aiPris').value)||0.5;
+  const kuponger = parseInt(document.getElementById('aiKuponger').value)||2;
+  const strategi = document.getElementById('aiStrategi').value||'balanserad';
+  const el = document.getElementById('aiContent');
+  el.innerHTML = '<div class="loading"><div class="spin"></div>AI analyserar hästar och statistik...</div>';
+
+  const d = await fetch(`/api/ai-system?budget=${budget}&pris=${pris}&kuponger=${kuponger}&strategi=${encodeURIComponent(strategi)}`)
+    .then(r=>r.json()).catch(()=>null);
+
+  if(!d||d.error){
+    el.innerHTML=`<div class="err">⚠ ${d?.error||'Kunde inte hämta data. V85 finns tillgänglig på lördagar.'}</div>`;
+    return;
+  }
+
+  const fmtKr2 = n=>Math.round(n).toLocaleString('sv-SE')+' kr';
+  const strColor = strategi==='säker'?'var(--blue)':strategi==='värde'?'var(--purple)':'var(--accent)';
+
+  let html = `<div class="grid" style="margin-bottom:16px">
+    <div class="scard y"><div class="slabel">Datum</div><div class="svalue" style="font-size:1rem">${d.datum}</div></div>
+    <div class="scard o"><div class="slabel">Strategi</div><div class="svalue" style="font-size:.9rem;color:${strColor}">${strategi.toUpperCase()}</div></div>
+    <div class="scard g"><div class="slabel">Total kostnad</div><div class="svalue" style="font-size:1.1rem">${fmtKr2(d.total_kostnad)}</div></div>
+    <div class="scard b"><div class="slabel">Totalt rader</div><div class="svalue">${d.total_rader.toLocaleString('sv-SE')}</div></div>
+    <div class="scard r"><div class="slabel">Historik</div><div class="svalue" style="font-size:1rem">${d.hist_omgangar}</div><div class="ssub">omgångar</div></div>
+  </div>`;
+
+  // En kupong-panel per kupong
+  for(const kupong of d.kuponger){
+    html += `<div class="sec">Kupong ${kupong.kupong} — ${kupong.rader.toLocaleString('sv-SE')} rader · ${fmtKr2(kupong.kostnad)}</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Lopp</th><th>Valda hästar</th><th class="r">Antal</th><th>Top 6 med AI-poäng</th></tr></thead><tbody>`;
+
+    for(let l=1;l<=8;l++){
+      const ld = kupong.lopp[l]||{};
+      const med = ld.hastar||[];
+      const top = ld.top_hastar||[];
+
+      const hastarTxt = med.map(nr=>{
+        const h = top.find(t=>t.nr==nr);
+        const pct = h?.sp_pct?h.sp_pct.toFixed(0)+'%':'—';
+        return `<span style="background:rgba(245,200,66,.15);color:var(--accent);border-radius:3px;padding:1px 5px;font-size:.72rem;font-weight:600">${nr} <span style="color:var(--muted)">${pct}</span></span>`;
+      }).join(' ');
+
+      const topTxt = top.map(h=>{
+        const inMed = med.includes(h.nr);
+        return `<div style="display:inline-flex;align-items:center;gap:4px;background:${inMed?'rgba(245,200,66,.1)':'var(--hi)'};border-radius:4px;padding:2px 6px;margin:1px;font-size:.68rem">
+          <span style="font-weight:${inMed?700:400};color:${inMed?'var(--accent)':'var(--text)'}">${h.nr}. ${h.namn}</span>
+          <span style="color:var(--muted)">${h.sp_pct?h.sp_pct.toFixed(0)+'%':'—'}</span>
+          <span style="color:var(--blue)">${h.hist_pct}%hist</span>
+          <span style="color:${inMed?'var(--accent)':'var(--muted)'};font-weight:700">⚡${h.ai_score}</span>
+        </div>`;
+      }).join('');
+
+      html += `<tr>
+        <td style="font-weight:600">L${l}</td>
+        <td>${hastarTxt}</td>
+        <td class="r mono">${med.length}</td>
+        <td style="font-size:.7rem">${topTxt}</td>
+      </tr>`;
+    }
+    html += `</tbody></table></div>`;
+  }
+
+  // Spara kuponger för export
+  window._aiKuponger = d.kuponger;
+  window._aiDatum    = d.datum;
+
+  html += `<div style="display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap">
+    <button onclick="exporteraXML(window._aiKuponger, window._aiDatum)"
+      style="background:var(--green);color:#0a0c0f;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.8rem;padding:9px 18px;cursor:pointer">
+      📥 Ladda ned ATG XML-fil
+    </button>
+    <span style="font-size:.7rem;color:var(--muted)">Ladda upp på atg.se → Spela reducerat → Filinlämning</span>
+  </div>
+  <div style="font-size:.72rem;color:var(--muted);margin-top:10px;line-height:1.6">
+    💡 <strong>AI-poäng</strong> = kombination av ATG live-% och historisk vinstfrekvens per rank.<br>
+    <strong>Balanserad:</strong> 50% ATG + 50% historik &nbsp;|&nbsp;
+    <strong>Säker:</strong> 70% ATG + 30% historik &nbsp;|&nbsp;
+    <strong>Värde:</strong> belönar hästar med hög historik relativt låg spelprocent
+  </div>`;
+
+  el.innerHTML = html;
+}
+
+// ── TIPS & LÄNKAR ──────────────────────────────────────────
+function laddaTips(){
+  const links = [
+    { kategori:"🏇 Tips & Analys", sidor:[
+      { namn:"TravsportSverige", url:"https://www.travsport.se", beskr:"Officiell travstatistik, startlistor och resultat" },
+      { namn:"ATG Speltips", url:"https://www.atg.se/spel/tips", beskr:"ATGs egna speltips och analyser" },
+      { namn:"Sulkysport", url:"https://www.sulkysport.se", beskr:"Nyheter, analyser och tips för trav" },
+      { namn:"Travronden", url:"https://www.travronden.se", beskr:"Travtidning med djupgående analyser" },
+      { namn:"Hästsverige", url:"https://www.hastsverige.se", beskr:"Tips och information om trav och galopp" },
+    ]},
+    { kategori:"📊 Statistik & Odds", sidor:[
+      { namn:"ATG Live", url:"https://www.atg.se/spel/V85", beskr:"Live spelprocent och odds för kommande V85" },
+      { namn:"TravsportSverige Statistik", url:"https://www.travsport.se/statistik", beskr:"Häst- och kusstatistik" },
+      { namn:"Equidia", url:"https://www.equidia.fr", beskr:"Fransk travstatistik (bra för internationella hästar)" },
+    ]},
+    { kategori:"🎯 Systemverktyg", sidor:[
+      { namn:"ATG Systemspel", url:"https://www.atg.se/spel/system", beskr:"ATGs eget systemspelsverktyg" },
+      { namn:"Trotto", url:"https://www.trotto.se", beskr:"Travtips och systemhjälp" },
+    ]},
+    { kategori:"📺 Streaming & TV", sidor:[
+      { namn:"ATG Play", url:"https://www.atg.se/play", beskr:"Livestream av travlopp" },
+      { namn:"TravsportSverige TV", url:"https://tv.travsport.se", beskr:"Direktsändningar och repriser" },
+    ]},
+  ];
+
+  let html = `<div style="max-width:800px">
+    <div class="info" style="margin-bottom:20px">Klicka på en länk för att öppna i ny flik.</div>`;
+
+  for(const kat of links){
+    html += `<div class="sec">${kat.kategori}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:16px">`;
+    for(const s of kat.sidor){
+      html += `<a href="${s.url}" target="_blank" rel="noopener"
+        style="display:block;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 16px;text-decoration:none;transition:border-color .15s"
+        onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-weight:600;color:var(--text);margin-bottom:4px">${s.namn} ↗</div>
+        <div style="font-size:.75rem;color:var(--muted)">${s.beskr}</div>
+      </a>`;
+    }
+    html += `</div>`;
+  }
+
+  html += `<div style="font-size:.7rem;color:var(--muted);margin-top:16px;padding:12px;background:var(--hi);border-radius:6px">
+    ℹ️ Cyberbob ansvarar inte för innehållet på externa sidor. Spela ansvarsfullt — Stödlinjen: 020-81 91 00
+  </div></div>`;
+
+  document.getElementById('tipsContent').innerHTML = html;
+}
+
+// ── ATG XML-EXPORT ────────────────────────────────────────
+async function exporteraXML(kuponger, datum){
+  if(!kuponger || !kuponger.length){
+    alert('Bygg ett system först!');
+    return;
+  }
+
+  // Räkna ut max startnummer
+  let maxNr = 15;
+  for(const k of kuponger){
+    for(const ld of Object.values(k.lopp||{})){
+      const hastar = ld.hastar || [];
+      if(hastar.length) maxNr = Math.max(maxNr, ...hastar);
+    }
+  }
+
+  const res = await fetch('/api/exportera-xml', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      kuponger,
+      speltyp: 'V85',
+      datum: datum || new Date().toISOString().slice(0,10),
+      max_hastar: maxNr
+    })
+  });
+
+  if(!res.ok){ alert('Kunde inte generera XML-fil'); return; }
+
+  const blob = await res.blob();
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `V85_${datum||'system'}_Cyberbob.xml`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── HÄMTA ──// ── AI-SYSTEM ──────────────────────────────────────────────
+async function laddaAI(){
+  const budget   = parseFloat(document.getElementById('aiBudget').value)||200;
+  const pris     = parseFloat(document.getElementById('aiPris').value)||0.5;
+  const kuponger = parseInt(document.getElementById('aiKuponger').value)||2;
+  const strategi = document.getElementById('aiStrategi').value||'balanserad';
+  const el = document.getElementById('aiContent');
+  el.innerHTML = '<div class="loading"><div class="spin"></div>AI analyserar hästar och statistik...</div>';
+
+  const d = await fetch(`/api/ai-system?budget=${budget}&pris=${pris}&kuponger=${kuponger}&strategi=${encodeURIComponent(strategi)}`)
+    .then(r=>r.json()).catch(()=>null);
+
+  if(!d||d.error){
+    el.innerHTML=`<div class="err">⚠ ${d?.error||'Kunde inte hämta data. V85 finns tillgänglig på lördagar.'}</div>`;
+    return;
+  }
+
+  const fmtKr2 = n=>Math.round(n).toLocaleString('sv-SE')+' kr';
+  const strColor = strategi==='säker'?'var(--blue)':strategi==='värde'?'var(--purple)':'var(--accent)';
+
+  let html = `<div class="grid" style="margin-bottom:16px">
+    <div class="scard y"><div class="slabel">Datum</div><div class="svalue" style="font-size:1rem">${d.datum}</div></div>
+    <div class="scard o"><div class="slabel">Strategi</div><div class="svalue" style="font-size:.9rem;color:${strColor}">${strategi.toUpperCase()}</div></div>
+    <div class="scard g"><div class="slabel">Total kostnad</div><div class="svalue" style="font-size:1.1rem">${fmtKr2(d.total_kostnad)}</div></div>
+    <div class="scard b"><div class="slabel">Totalt rader</div><div class="svalue">${d.total_rader.toLocaleString('sv-SE')}</div></div>
+    <div class="scard r"><div class="slabel">Historik</div><div class="svalue" style="font-size:1rem">${d.hist_omgangar}</div><div class="ssub">omgångar</div></div>
+  </div>`;
+
+  // En kupong-panel per kupong
+  for(const kupong of d.kuponger){
+    html += `<div class="sec">Kupong ${kupong.kupong} — ${kupong.rader.toLocaleString('sv-SE')} rader · ${fmtKr2(kupong.kostnad)}</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Lopp</th><th>Valda hästar</th><th class="r">Antal</th><th>Top 6 med AI-poäng</th></tr></thead><tbody>`;
+
+    for(let l=1;l<=8;l++){
+      const ld = kupong.lopp[l]||{};
+      const med = ld.hastar||[];
+      const top = ld.top_hastar||[];
+
+      const hastarTxt = med.map(nr=>{
+        const h = top.find(t=>t.nr==nr);
+        const pct = h?.sp_pct?h.sp_pct.toFixed(0)+'%':'—';
+        return `<span style="background:rgba(245,200,66,.15);color:var(--accent);border-radius:3px;padding:1px 5px;font-size:.72rem;font-weight:600">${nr} <span style="color:var(--muted)">${pct}</span></span>`;
+      }).join(' ');
+
+      const topTxt = top.map(h=>{
+        const inMed = med.includes(h.nr);
+        return `<div style="display:inline-flex;align-items:center;gap:4px;background:${inMed?'rgba(245,200,66,.1)':'var(--hi)'};border-radius:4px;padding:2px 6px;margin:1px;font-size:.68rem">
+          <span style="font-weight:${inMed?700:400};color:${inMed?'var(--accent)':'var(--text)'}">${h.nr}. ${h.namn}</span>
+          <span style="color:var(--muted)">${h.sp_pct?h.sp_pct.toFixed(0)+'%':'—'}</span>
+          <span style="color:var(--blue)">${h.hist_pct}%hist</span>
+          <span style="color:${inMed?'var(--accent)':'var(--muted)'};font-weight:700">⚡${h.ai_score}</span>
+        </div>`;
+      }).join('');
+
+      html += `<tr>
+        <td style="font-weight:600">L${l}</td>
+        <td>${hastarTxt}</td>
+        <td class="r mono">${med.length}</td>
+        <td style="font-size:.7rem">${topTxt}</td>
+      </tr>`;
+    }
+    html += `</tbody></table></div>`;
+  }
+
+  // Spara kuponger för export
+  window._aiKuponger = d.kuponger;
+  window._aiDatum    = d.datum;
+
+  html += `<div style="display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap">
+    <button onclick="exporteraXML(window._aiKuponger, window._aiDatum)"
+      style="background:var(--green);color:#0a0c0f;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.8rem;padding:9px 18px;cursor:pointer">
+      📥 Ladda ned ATG XML-fil
+    </button>
+    <span style="font-size:.7rem;color:var(--muted)">Ladda upp på atg.se → Spela reducerat → Filinlämning</span>
+  </div>
+  <div style="font-size:.72rem;color:var(--muted);margin-top:10px;line-height:1.6">
+    💡 <strong>AI-poäng</strong> = kombination av ATG live-% och historisk vinstfrekvens per rank.<br>
+    <strong>Balanserad:</strong> 50% ATG + 50% historik &nbsp;|&nbsp;
+    <strong>Säker:</strong> 70% ATG + 30% historik &nbsp;|&nbsp;
+    <strong>Värde:</strong> belönar hästar med hög historik relativt låg spelprocent
+  </div>`;
+
+  el.innerHTML = html;
+}
+
+// ── TIPS & LÄNKAR ──────────────────────────────────────────
+function laddaTips(){
+  const links = [
+    { kategori:"🏇 Tips & Analys", sidor:[
+      { namn:"TravsportSverige", url:"https://www.travsport.se", beskr:"Officiell travstatistik, startlistor och resultat" },
+      { namn:"ATG Speltips", url:"https://www.atg.se/spel/tips", beskr:"ATGs egna speltips och analyser" },
+      { namn:"Sulkysport", url:"https://www.sulkysport.se", beskr:"Nyheter, analyser och tips för trav" },
+      { namn:"Travronden", url:"https://www.travronden.se", beskr:"Travtidning med djupgående analyser" },
+      { namn:"Hästsverige", url:"https://www.hastsverige.se", beskr:"Tips och information om trav och galopp" },
+    ]},
+    { kategori:"📊 Statistik & Odds", sidor:[
+      { namn:"ATG Live", url:"https://www.atg.se/spel/V85", beskr:"Live spelprocent och odds för kommande V85" },
+      { namn:"TravsportSverige Statistik", url:"https://www.travsport.se/statistik", beskr:"Häst- och kusstatistik" },
+      { namn:"Equidia", url:"https://www.equidia.fr", beskr:"Fransk travstatistik (bra för internationella hästar)" },
+    ]},
+    { kategori:"🎯 Systemverktyg", sidor:[
+      { namn:"ATG Systemspel", url:"https://www.atg.se/spel/system", beskr:"ATGs eget systemspelsverktyg" },
+      { namn:"Trotto", url:"https://www.trotto.se", beskr:"Travtips och systemhjälp" },
+    ]},
+    { kategori:"📺 Streaming & TV", sidor:[
+      { namn:"ATG Play", url:"https://www.atg.se/play", beskr:"Livestream av travlopp" },
+      { namn:"TravsportSverige TV", url:"https://tv.travsport.se", beskr:"Direktsändningar och repriser" },
+    ]},
+  ];
+
+  let html = `<div style="max-width:800px">
+    <div class="info" style="margin-bottom:20px">Klicka på en länk för att öppna i ny flik.</div>`;
+
+  for(const kat of links){
+    html += `<div class="sec">${kat.kategori}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:16px">`;
+    for(const s of kat.sidor){
+      html += `<a href="${s.url}" target="_blank" rel="noopener"
+        style="display:block;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 16px;text-decoration:none;transition:border-color .15s"
+        onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-weight:600;color:var(--text);margin-bottom:4px">${s.namn} ↗</div>
+        <div style="font-size:.75rem;color:var(--muted)">${s.beskr}</div>
+      </a>`;
+    }
+    html += `</div>`;
+  }
+
+  html += `<div style="font-size:.7rem;color:var(--muted);margin-top:16px;padding:12px;background:var(--hi);border-radius:6px">
+    ℹ️ Cyberbob ansvarar inte för innehållet på externa sidor. Spela ansvarsfullt — Stödlinjen: 020-81 91 00
+  </div></div>`;
+
+  document.getElementById('tipsContent').innerHTML = html;
+}
+
+// ── ATG XML-EXPORT ────────────────────────────────────────
+async function exporteraXML(kuponger, datum){
+  if(!kuponger || !kuponger.length){
+    alert('Bygg ett system först!');
+    return;
+  }
+
+  // Räkna ut max startnummer
+  let maxNr = 15;
+  for(const k of kuponger){
+    for(const ld of Object.values(k.lopp||{})){
+      const hastar = ld.hastar || [];
+      if(hastar.length) maxNr = Math.max(maxNr, ...hastar);
+    }
+  }
+
+  const res = await fetch('/api/exportera-xml', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      kuponger,
+      speltyp: 'V85',
+      datum: datum || new Date().toISOString().slice(0,10),
+      max_hastar: maxNr
+    })
+  });
+
+  if(!res.ok){ alert('Kunde inte generera XML-fil'); return; }
+
+  const blob = await res.blob();
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `V85_${datum||'system'}_Cyberbob.xml`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── HÄMTA ─────────────────────────────────────────────────
+async function triggerFetch(){
+  const datum = document.getElementById('fetchDate').value;
+  if(!datum){alert('Välj ett datum');return;}
+  const btn=document.getElementById('fetchBtn');
+  btn.disabled=true;btn.textContent='⟳ Hämtar…';
+  await fetch('/api/hamta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({datum})});
+  setTimeout(()=>{btn.disabled=false;btn.textContent='⬇ Hämta datum';location.reload();},5000);
+}
+
+document.getElementById('fetchDate').value = new Date().toISOString().slice(0,10);
+loadDashboard();
+{% endraw %}
+</script>
+</body>
+</html>
