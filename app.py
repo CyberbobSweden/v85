@@ -803,6 +803,227 @@ def api_reducerat():
         "n_kupong": n_kupong,
     })
 
+
+@app.route("/api/ai-system")
+def api_ai_system():
+    """
+    AI-byggt V85-system baserat på:
+    1. Live ATG-spelprocent (favorit = mest spelad)
+    2. Historisk vinstfrekvens per rank
+    3. Budget-optimering
+    """
+    import requests as req, time
+    from datetime import date, timedelta
+
+    budget       = float(request.args.get("budget", 200))
+    pris         = float(request.args.get("pris", 0.5))
+    n_kupong     = int(request.args.get("kuponger", 2))
+    strategi     = request.args.get("strategi", "balanserad")
+    # strategi: "säker" (favoriter), "balanserad", "värde" (odds/chans)
+
+    H = {"Accept":"application/json","User-Agent":"Mozilla/5.0",
+         "Origin":"https://www.atg.se","Referer":"https://www.atg.se/spel/V85"}
+    CAL = "https://www.atg.se/services/racinginfo/v1/api"
+    BET = "https://horse-betting-info.prod.c1.atg.cloud/api-public/v0"
+
+    # Hämta kommande V85
+    dag = date.today()
+    while dag.weekday() != 5:
+        dag += timedelta(days=1)
+
+    try:
+        kal = req.get(f"{CAL}/calendar/day/{dag}", headers=H, timeout=10).json()
+    except:
+        return jsonify({"error": "Kunde inte hämta kalender"}), 500
+
+    tracks = kal.get("tracks", [])
+    UTLANDSKA = {54, 78, 91, 92, 93, 94, 95, 96, 97, 98}
+
+    game = None
+    for lnr in [3,4,5,6,2,7,1,8]:
+        for track in tracks:
+            tid = track.get("id")
+            if not tid or tid in UTLANDSKA:
+                continue
+            gid = f"V85_{dag}_{tid}_{lnr}"
+            try:
+                g = req.get(f"{BET}/games/{gid}", headers=H, timeout=8).json()
+                time.sleep(0.2)
+                if g and isinstance(g, dict) and g.get("id"):
+                    game = g
+                    break
+            except:
+                pass
+        if game:
+            break
+
+    if not game:
+        return jsonify({"error": f"Ingen V85 hittad för {dag}"}), 404
+
+    # Hämta historisk rankstatistik
+    stat_raw = q("""
+        SELECT COALESCE(l.v85_leg, l.nummer) as lopp_nr,
+               h.v85_rank, COUNT(*) as tot, SUM(h.v85_vinnare) as vann
+        FROM hastar h JOIN lopp l ON h.lopp_id=l.id
+        WHERE h.struken=0 AND h.v85_rank IS NOT NULL
+          AND COALESCE(l.v85_leg, l.nummer) BETWEEN 1 AND 8
+        GROUP BY lopp_nr, h.v85_rank ORDER BY lopp_nr, h.v85_rank
+    """)
+
+    # Bygg kumulativ historisk vinstprocent per lopp
+    from collections import defaultdict
+    hist = defaultdict(dict)
+    hist_tot = defaultdict(int)
+    for r in stat_raw:
+        hist[r["lopp_nr"]][r["v85_rank"]] = {
+            "vann": r["vann"] or 0, "tot": r["tot"]
+        }
+        hist_tot[r["lopp_nr"]] = max(hist_tot[r["lopp_nr"]], r["tot"])
+
+    # Bygg AI-score per häst per lopp
+    lopp_scores = {}
+    for i, race in enumerate(game.get("races", []), 1):
+        rid = race.get("id")
+        try:
+            rd = req.get(f"{BET}/races/{rid}", headers=H, timeout=10).json()
+            time.sleep(0.3)
+            starts = rd.get("starts", []) if rd else []
+        except:
+            starts = []
+
+        struktna = set(race.get("result", {}).get("scratchings", []))
+        hastar = []
+
+        for s in starts:
+            nr = s.get("number")
+            if nr in struktna:
+                continue
+            horse  = s.get("horse", {}) or {}
+            driver = s.get("driver", {}) or {}
+            pools  = s.get("pools", {}) or {}
+
+            sp_pct = None
+            for pk in ["V85","vinnare","win"]:
+                p = pools.get(pk, {})
+                if isinstance(p, dict):
+                    sp_pct = p.get("betDistribution") or p.get("percentage")
+                    if sp_pct: break
+
+            odds = None
+            for pk in ["vinnare","win"]:
+                p = pools.get(pk, {})
+                if isinstance(p, dict):
+                    odds = p.get("odds")
+                    if odds: break
+
+            kusk = (driver.get("firstName","") + " " + driver.get("lastName","")).strip()
+            hastar.append({
+                "nr": nr,
+                "namn": horse.get("name",""),
+                "kusk": kusk,
+                "sp_pct": sp_pct or 0,
+                "odds": odds,
+            })
+
+        # Sortera efter spelprocent → ge rank
+        hastar_s = sorted(hastar, key=lambda h: -(h["sp_pct"] or 0))
+        for rank, h in enumerate(hastar_s, 1):
+            h["rank"] = rank
+            # Historisk vinstchans för denna rank i detta lopp
+            hdata = hist[i].get(rank, {})
+            htot  = hist_tot[i] or 1
+            hist_pct = (hdata.get("vann",0) / htot * 100) if hdata else 0
+
+            # AI-poäng: kombination av live-% och historik
+            if strategi == "säker":
+                # Favoriter — vikta ATG-% tungt
+                score = (h["sp_pct"] or 0) * 0.7 + hist_pct * 0.3
+            elif strategi == "värde":
+                # Värdebet — belöna hög historisk chans relativt låg ATG-%
+                sp = h["sp_pct"] or 0.1
+                score = hist_pct * 0.6 + (hist_pct / sp if sp > 0 else 0) * 40 * 0.4
+            else:  # balanserad
+                score = (h["sp_pct"] or 0) * 0.5 + hist_pct * 0.5
+
+            h["hist_pct"] = round(hist_pct, 1)
+            h["ai_score"] = round(score, 1)
+
+        # Sortera på AI-score
+        hastar_s.sort(key=lambda h: -h["ai_score"])
+        lopp_scores[i] = hastar_s
+
+    # Bygg kuponger utifrån budget
+    budget_per = budget / n_kupong
+    max_rader  = int(budget_per / pris)
+
+    def raeder(val):
+        r = 1
+        for v in val.values(): r *= max(len(v),1)
+        return r
+
+    kuponger = []
+    for k in range(n_kupong):
+        val = {}
+        for l in range(1, 9):
+            hastar_l = lopp_scores.get(l, [])
+            if not hastar_l:
+                val[l] = [1]; continue
+
+            # Alltid ta rank 1 (favorit enligt AI)
+            val[l] = [hastar_l[0]["nr"]]
+
+            # Lägg till fler hästar baserat på kupong-rotation
+            # Kupong 0: lägg till rank 2 om budget
+            # Kupong 1: lägg till rank 3 om budget
+            # etc.
+            extra_rank = k + 2
+            for h in hastar_l[1:]:
+                if h["rank"] <= extra_rank + 1:
+                    test = {ll: list(v) for ll,v in val.items()}
+                    test[l] = list(val[l]) + [h["nr"]]
+                    if raeder(test) * pris <= budget_per:
+                        val[l].append(h["nr"])
+
+        # Fyll upp med greedy inom budget
+        for h_l in sorted(lopp_scores.items(), key=lambda x: -max((h["ai_score"] for h in x[1][1:2]), default=0)):
+            l, hastar_l = h_l
+            for h in hastar_l:
+                if h["nr"] in val[l]: continue
+                test = {ll: list(v) for ll,v in val.items()}
+                test[l] = list(val[l]) + [h["nr"]]
+                if raeder(test) * pris <= budget_per:
+                    val[l].append(h["nr"])
+                else:
+                    break
+
+        kuponger.append({
+            "kupong": k+1,
+            "rader": raeder(val),
+            "kostnad": round(raeder(val)*pris, 2),
+            "lopp": {str(l): {
+                "hastar": sorted(val[l]),
+                "antal": len(val[l]),
+                "top_hastar": [{
+                    "nr": h["nr"], "namn": h["namn"], "kusk": h["kusk"],
+                    "sp_pct": h["sp_pct"], "hist_pct": h["hist_pct"],
+                    "ai_score": h["ai_score"], "rank": h["rank"],
+                    "med": h["nr"] in val[l]
+                } for h in lopp_scores.get(l,[])[:6]]
+            } for l in range(1,9)},
+        })
+
+    return jsonify({
+        "datum": str(dag),
+        "strategi": strategi,
+        "budget": budget,
+        "pris": pris,
+        "n_kupong": n_kupong,
+        "kuponger": kuponger,
+        "total_rader": sum(k["rader"] for k in kuponger),
+        "total_kostnad": round(sum(k["kostnad"] for k in kuponger), 2),
+        "hist_omgangar": hist_tot.get(1, 0),
+    })
+
 if __name__ == "__main__":
     print("\n  V85 Statistik · http://localhost:5000\n")
     app.run(debug=True, port=5000)

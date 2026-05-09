@@ -135,7 +135,7 @@ select{background:var(--hi);color:var(--text);border:1px solid var(--border);bor
       </div>
       <div class="nav-right">
         <input type="date" id="fetchDate">
-        <button class="btn" id="fetchBtn" onclick="triggerFetch()">⬇ Hämta datum</button>
+        <button class="btn" id="fetchBtn" onclick="triggerFetch()" title="Hämta en specifik lördags V85-data och lägg till i databasen">⬇ Hämta ny omgång</button>
         <button class="btn ghost" onclick="location.reload()">↺</button>
       </div>
     </div>
@@ -147,6 +147,8 @@ select{background:var(--hi);color:var(--text);border:1px solid var(--border);bor
     <button class="tab" onclick="goto('systembyggare')">Systembyggare</button>
     <button class="tab" onclick="goto('systemforslag')">Systemförslag</button>
     <button class="tab" onclick="goto('kommande')">🏇 Kommande V85</button>
+    <button class="tab" onclick="goto('ai')">🤖 AI-System</button>
+    <button class="tab" onclick="goto('tips')">🔗 Tips & Länkar</button>
     <button class="tab" onclick="goto('statistik')">Utdelningar</button>
   </div>
 </nav>
@@ -269,6 +271,39 @@ select{background:var(--hi);color:var(--text);border:1px solid var(--border);bor
   <div id="kommContent"><div class="loading"><div class="spin"></div>Hämtar V85-data från ATG...</div></div>
 </div>
 
+<!-- ══ AI-SYSTEM ═════════════════════════════════════════════ -->
+<div class="page" id="page-ai">
+  <div class="info">AI:n kombinerar live ATG-spelprocent med historisk vinststatistik och bygger ett optimerat system automatiskt.</div>
+  <div class="filter-bar">
+    <span class="filter-label">Budget:</span>
+    <input type="number" id="aiBudget" value="200" min="10" step="50"
+      style="background:var(--hi);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px 10px;width:90px;font-family:'DM Sans',sans-serif;font-size:.76rem">
+    <span class="filter-label" style="margin-left:4px">kr</span>
+    <select id="aiPris" style="background:var(--hi);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-size:.76rem;margin-left:8px">
+      <option value="0.5">0,50 kr/rad</option>
+      <option value="1">1 kr/rad</option>
+      <option value="4">4 kr/rad</option>
+    </select>
+    <select id="aiKuponger" style="background:var(--hi);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-size:.76rem;margin-left:8px">
+      <option value="1">1 kupong</option>
+      <option value="2" selected>2 kuponger</option>
+      <option value="3">3 kuponger</option>
+    </select>
+    <select id="aiStrategi" style="background:var(--hi);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-size:.76rem;margin-left:8px">
+      <option value="balanserad">⚖️ Balanserad</option>
+      <option value="säker">🛡️ Säker (favoriter)</option>
+      <option value="värde">💎 Värde (chans/odds)</option>
+    </select>
+    <button class="btn" onclick="laddaAI()" style="margin-left:10px">🤖 Bygg AI-system</button>
+  </div>
+  <div id="aiContent"><div class="info">Klicka "Bygg AI-system" för att generera ett system för kommande V85.</div></div>
+</div>
+
+<!-- ══ TIPS & LÄNKAR ═══════════════════════════════════════ -->
+<div class="page" id="page-tips">
+  <div id="tipsContent"></div>
+</div>
+
 <!-- ══ STATISTIK/UTDELNINGAR ══════════════════════════════ -->
 <div class="page" id="page-statistik">
   <div class="sec">Alla utdelningar</div>
@@ -295,7 +330,7 @@ function goto(p){
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
   document.querySelectorAll('.tab').forEach((t,i)=>{
-    t.classList.toggle('active',['dashboard','omgangar','loppanalys','systembyggare','systemforslag','kommande','statistik'][i]===p);
+    t.classList.toggle('active',['dashboard','omgangar','loppanalys','systembyggare','systemforslag','kommande','ai','tips','statistik'][i]===p);
   });
   if(!loadedTabs.has(p)){
     loadedTabs.add(p);
@@ -304,6 +339,8 @@ function goto(p){
     if(p==='systembyggare') laddaSystembyggare();
     if(p==='systemforslag') laddaSystemforslag();
     if(p==='kommande') laddaKommande();
+    if(p==='ai') laddaAI();
+    if(p==='tips') laddaTips();
     if(p==='statistik') loadStatistik();
   }
 }
@@ -1183,7 +1220,255 @@ async function beraknaKommSystem(){
   redEl.innerHTML = html;
 }
 
-// ── HÄMTA ──// ── HÄMTA ─────────────────────────────────────────────────
+// ── AI-SYSTEM ──────────────────────────────────────────────
+async function laddaAI(){
+  const budget   = parseFloat(document.getElementById('aiBudget').value)||200;
+  const pris     = parseFloat(document.getElementById('aiPris').value)||0.5;
+  const kuponger = parseInt(document.getElementById('aiKuponger').value)||2;
+  const strategi = document.getElementById('aiStrategi').value||'balanserad';
+  const el = document.getElementById('aiContent');
+  el.innerHTML = '<div class="loading"><div class="spin"></div>AI analyserar hästar och statistik...</div>';
+
+  const d = await fetch(`/api/ai-system?budget=${budget}&pris=${pris}&kuponger=${kuponger}&strategi=${encodeURIComponent(strategi)}`)
+    .then(r=>r.json()).catch(()=>null);
+
+  if(!d||d.error){
+    el.innerHTML=`<div class="err">⚠ ${d?.error||'Kunde inte hämta data. V85 finns tillgänglig på lördagar.'}</div>`;
+    return;
+  }
+
+  const fmtKr2 = n=>Math.round(n).toLocaleString('sv-SE')+' kr';
+  const strColor = strategi==='säker'?'var(--blue)':strategi==='värde'?'var(--purple)':'var(--accent)';
+
+  let html = `<div class="grid" style="margin-bottom:16px">
+    <div class="scard y"><div class="slabel">Datum</div><div class="svalue" style="font-size:1rem">${d.datum}</div></div>
+    <div class="scard o"><div class="slabel">Strategi</div><div class="svalue" style="font-size:.9rem;color:${strColor}">${strategi.toUpperCase()}</div></div>
+    <div class="scard g"><div class="slabel">Total kostnad</div><div class="svalue" style="font-size:1.1rem">${fmtKr2(d.total_kostnad)}</div></div>
+    <div class="scard b"><div class="slabel">Totalt rader</div><div class="svalue">${d.total_rader.toLocaleString('sv-SE')}</div></div>
+    <div class="scard r"><div class="slabel">Historik</div><div class="svalue" style="font-size:1rem">${d.hist_omgangar}</div><div class="ssub">omgångar</div></div>
+  </div>`;
+
+  // En kupong-panel per kupong
+  for(const kupong of d.kuponger){
+    html += `<div class="sec">Kupong ${kupong.kupong} — ${kupong.rader.toLocaleString('sv-SE')} rader · ${fmtKr2(kupong.kostnad)}</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Lopp</th><th>Valda hästar</th><th class="r">Antal</th><th>Top 6 med AI-poäng</th></tr></thead><tbody>`;
+
+    for(let l=1;l<=8;l++){
+      const ld = kupong.lopp[l]||{};
+      const med = ld.hastar||[];
+      const top = ld.top_hastar||[];
+
+      const hastarTxt = med.map(nr=>{
+        const h = top.find(t=>t.nr==nr);
+        const pct = h?.sp_pct?h.sp_pct.toFixed(0)+'%':'—';
+        return `<span style="background:rgba(245,200,66,.15);color:var(--accent);border-radius:3px;padding:1px 5px;font-size:.72rem;font-weight:600">${nr} <span style="color:var(--muted)">${pct}</span></span>`;
+      }).join(' ');
+
+      const topTxt = top.map(h=>{
+        const inMed = med.includes(h.nr);
+        return `<div style="display:inline-flex;align-items:center;gap:4px;background:${inMed?'rgba(245,200,66,.1)':'var(--hi)'};border-radius:4px;padding:2px 6px;margin:1px;font-size:.68rem">
+          <span style="font-weight:${inMed?700:400};color:${inMed?'var(--accent)':'var(--text)'}">${h.nr}. ${h.namn}</span>
+          <span style="color:var(--muted)">${h.sp_pct?h.sp_pct.toFixed(0)+'%':'—'}</span>
+          <span style="color:var(--blue)">${h.hist_pct}%hist</span>
+          <span style="color:${inMed?'var(--accent)':'var(--muted)'};font-weight:700">⚡${h.ai_score}</span>
+        </div>`;
+      }).join('');
+
+      html += `<tr>
+        <td style="font-weight:600">L${l}</td>
+        <td>${hastarTxt}</td>
+        <td class="r mono">${med.length}</td>
+        <td style="font-size:.7rem">${topTxt}</td>
+      </tr>`;
+    }
+    html += `</tbody></table></div>`;
+  }
+
+  html += `<div style="font-size:.72rem;color:var(--muted);margin-top:10px;line-height:1.6">
+    💡 <strong>AI-poäng</strong> = kombination av ATG live-% och historisk vinstfrekvens per rank.<br>
+    <strong>Balanserad:</strong> 50% ATG + 50% historik &nbsp;|&nbsp;
+    <strong>Säker:</strong> 70% ATG + 30% historik &nbsp;|&nbsp;
+    <strong>Värde:</strong> belönar hästar med hög historik relativt låg spelprocent
+  </div>`;
+
+  el.innerHTML = html;
+}
+
+// ── TIPS & LÄNKAR ──────────────────────────────────────────
+function laddaTips(){
+  const links = [
+    { kategori:"🏇 Tips & Analys", sidor:[
+      { namn:"TravsportSverige", url:"https://www.travsport.se", beskr:"Officiell travstatistik, startlistor och resultat" },
+      { namn:"ATG Speltips", url:"https://www.atg.se/spel/tips", beskr:"ATGs egna speltips och analyser" },
+      { namn:"Sulkysport", url:"https://www.sulkysport.se", beskr:"Nyheter, analyser och tips för trav" },
+      { namn:"Travronden", url:"https://www.travronden.se", beskr:"Travtidning med djupgående analyser" },
+      { namn:"Hästsverige", url:"https://www.hastsverige.se", beskr:"Tips och information om trav och galopp" },
+    ]},
+    { kategori:"📊 Statistik & Odds", sidor:[
+      { namn:"ATG Live", url:"https://www.atg.se/spel/V85", beskr:"Live spelprocent och odds för kommande V85" },
+      { namn:"TravsportSverige Statistik", url:"https://www.travsport.se/statistik", beskr:"Häst- och kusstatistik" },
+      { namn:"Equidia", url:"https://www.equidia.fr", beskr:"Fransk travstatistik (bra för internationella hästar)" },
+    ]},
+    { kategori:"🎯 Systemverktyg", sidor:[
+      { namn:"ATG Systemspel", url:"https://www.atg.se/spel/system", beskr:"ATGs eget systemspelsverktyg" },
+      { namn:"Trotto", url:"https://www.trotto.se", beskr:"Travtips och systemhjälp" },
+    ]},
+    { kategori:"📺 Streaming & TV", sidor:[
+      { namn:"ATG Play", url:"https://www.atg.se/play", beskr:"Livestream av travlopp" },
+      { namn:"TravsportSverige TV", url:"https://tv.travsport.se", beskr:"Direktsändningar och repriser" },
+    ]},
+  ];
+
+  let html = `<div style="max-width:800px">
+    <div class="info" style="margin-bottom:20px">Klicka på en länk för att öppna i ny flik.</div>`;
+
+  for(const kat of links){
+    html += `<div class="sec">${kat.kategori}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:16px">`;
+    for(const s of kat.sidor){
+      html += `<a href="${s.url}" target="_blank" rel="noopener"
+        style="display:block;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 16px;text-decoration:none;transition:border-color .15s"
+        onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-weight:600;color:var(--text);margin-bottom:4px">${s.namn} ↗</div>
+        <div style="font-size:.75rem;color:var(--muted)">${s.beskr}</div>
+      </a>`;
+    }
+    html += `</div>`;
+  }
+
+  html += `<div style="font-size:.7rem;color:var(--muted);margin-top:16px;padding:12px;background:var(--hi);border-radius:6px">
+    ℹ️ Cyberbob ansvarar inte för innehållet på externa sidor. Spela ansvarsfullt — Stödlinjen: 020-81 91 00
+  </div></div>`;
+
+  document.getElementById('tipsContent').innerHTML = html;
+}
+
+// ── HÄMTA ──// ── AI-SYSTEM ──────────────────────────────────────────────
+async function laddaAI(){
+  const budget   = parseFloat(document.getElementById('aiBudget').value)||200;
+  const pris     = parseFloat(document.getElementById('aiPris').value)||0.5;
+  const kuponger = parseInt(document.getElementById('aiKuponger').value)||2;
+  const strategi = document.getElementById('aiStrategi').value||'balanserad';
+  const el = document.getElementById('aiContent');
+  el.innerHTML = '<div class="loading"><div class="spin"></div>AI analyserar hästar och statistik...</div>';
+
+  const d = await fetch(`/api/ai-system?budget=${budget}&pris=${pris}&kuponger=${kuponger}&strategi=${encodeURIComponent(strategi)}`)
+    .then(r=>r.json()).catch(()=>null);
+
+  if(!d||d.error){
+    el.innerHTML=`<div class="err">⚠ ${d?.error||'Kunde inte hämta data. V85 finns tillgänglig på lördagar.'}</div>`;
+    return;
+  }
+
+  const fmtKr2 = n=>Math.round(n).toLocaleString('sv-SE')+' kr';
+  const strColor = strategi==='säker'?'var(--blue)':strategi==='värde'?'var(--purple)':'var(--accent)';
+
+  let html = `<div class="grid" style="margin-bottom:16px">
+    <div class="scard y"><div class="slabel">Datum</div><div class="svalue" style="font-size:1rem">${d.datum}</div></div>
+    <div class="scard o"><div class="slabel">Strategi</div><div class="svalue" style="font-size:.9rem;color:${strColor}">${strategi.toUpperCase()}</div></div>
+    <div class="scard g"><div class="slabel">Total kostnad</div><div class="svalue" style="font-size:1.1rem">${fmtKr2(d.total_kostnad)}</div></div>
+    <div class="scard b"><div class="slabel">Totalt rader</div><div class="svalue">${d.total_rader.toLocaleString('sv-SE')}</div></div>
+    <div class="scard r"><div class="slabel">Historik</div><div class="svalue" style="font-size:1rem">${d.hist_omgangar}</div><div class="ssub">omgångar</div></div>
+  </div>`;
+
+  // En kupong-panel per kupong
+  for(const kupong of d.kuponger){
+    html += `<div class="sec">Kupong ${kupong.kupong} — ${kupong.rader.toLocaleString('sv-SE')} rader · ${fmtKr2(kupong.kostnad)}</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Lopp</th><th>Valda hästar</th><th class="r">Antal</th><th>Top 6 med AI-poäng</th></tr></thead><tbody>`;
+
+    for(let l=1;l<=8;l++){
+      const ld = kupong.lopp[l]||{};
+      const med = ld.hastar||[];
+      const top = ld.top_hastar||[];
+
+      const hastarTxt = med.map(nr=>{
+        const h = top.find(t=>t.nr==nr);
+        const pct = h?.sp_pct?h.sp_pct.toFixed(0)+'%':'—';
+        return `<span style="background:rgba(245,200,66,.15);color:var(--accent);border-radius:3px;padding:1px 5px;font-size:.72rem;font-weight:600">${nr} <span style="color:var(--muted)">${pct}</span></span>`;
+      }).join(' ');
+
+      const topTxt = top.map(h=>{
+        const inMed = med.includes(h.nr);
+        return `<div style="display:inline-flex;align-items:center;gap:4px;background:${inMed?'rgba(245,200,66,.1)':'var(--hi)'};border-radius:4px;padding:2px 6px;margin:1px;font-size:.68rem">
+          <span style="font-weight:${inMed?700:400};color:${inMed?'var(--accent)':'var(--text)'}">${h.nr}. ${h.namn}</span>
+          <span style="color:var(--muted)">${h.sp_pct?h.sp_pct.toFixed(0)+'%':'—'}</span>
+          <span style="color:var(--blue)">${h.hist_pct}%hist</span>
+          <span style="color:${inMed?'var(--accent)':'var(--muted)'};font-weight:700">⚡${h.ai_score}</span>
+        </div>`;
+      }).join('');
+
+      html += `<tr>
+        <td style="font-weight:600">L${l}</td>
+        <td>${hastarTxt}</td>
+        <td class="r mono">${med.length}</td>
+        <td style="font-size:.7rem">${topTxt}</td>
+      </tr>`;
+    }
+    html += `</tbody></table></div>`;
+  }
+
+  html += `<div style="font-size:.72rem;color:var(--muted);margin-top:10px;line-height:1.6">
+    💡 <strong>AI-poäng</strong> = kombination av ATG live-% och historisk vinstfrekvens per rank.<br>
+    <strong>Balanserad:</strong> 50% ATG + 50% historik &nbsp;|&nbsp;
+    <strong>Säker:</strong> 70% ATG + 30% historik &nbsp;|&nbsp;
+    <strong>Värde:</strong> belönar hästar med hög historik relativt låg spelprocent
+  </div>`;
+
+  el.innerHTML = html;
+}
+
+// ── TIPS & LÄNKAR ──────────────────────────────────────────
+function laddaTips(){
+  const links = [
+    { kategori:"🏇 Tips & Analys", sidor:[
+      { namn:"TravsportSverige", url:"https://www.travsport.se", beskr:"Officiell travstatistik, startlistor och resultat" },
+      { namn:"ATG Speltips", url:"https://www.atg.se/spel/tips", beskr:"ATGs egna speltips och analyser" },
+      { namn:"Sulkysport", url:"https://www.sulkysport.se", beskr:"Nyheter, analyser och tips för trav" },
+      { namn:"Travronden", url:"https://www.travronden.se", beskr:"Travtidning med djupgående analyser" },
+      { namn:"Hästsverige", url:"https://www.hastsverige.se", beskr:"Tips och information om trav och galopp" },
+    ]},
+    { kategori:"📊 Statistik & Odds", sidor:[
+      { namn:"ATG Live", url:"https://www.atg.se/spel/V85", beskr:"Live spelprocent och odds för kommande V85" },
+      { namn:"TravsportSverige Statistik", url:"https://www.travsport.se/statistik", beskr:"Häst- och kusstatistik" },
+      { namn:"Equidia", url:"https://www.equidia.fr", beskr:"Fransk travstatistik (bra för internationella hästar)" },
+    ]},
+    { kategori:"🎯 Systemverktyg", sidor:[
+      { namn:"ATG Systemspel", url:"https://www.atg.se/spel/system", beskr:"ATGs eget systemspelsverktyg" },
+      { namn:"Trotto", url:"https://www.trotto.se", beskr:"Travtips och systemhjälp" },
+    ]},
+    { kategori:"📺 Streaming & TV", sidor:[
+      { namn:"ATG Play", url:"https://www.atg.se/play", beskr:"Livestream av travlopp" },
+      { namn:"TravsportSverige TV", url:"https://tv.travsport.se", beskr:"Direktsändningar och repriser" },
+    ]},
+  ];
+
+  let html = `<div style="max-width:800px">
+    <div class="info" style="margin-bottom:20px">Klicka på en länk för att öppna i ny flik.</div>`;
+
+  for(const kat of links){
+    html += `<div class="sec">${kat.kategori}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:16px">`;
+    for(const s of kat.sidor){
+      html += `<a href="${s.url}" target="_blank" rel="noopener"
+        style="display:block;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 16px;text-decoration:none;transition:border-color .15s"
+        onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-weight:600;color:var(--text);margin-bottom:4px">${s.namn} ↗</div>
+        <div style="font-size:.75rem;color:var(--muted)">${s.beskr}</div>
+      </a>`;
+    }
+    html += `</div>`;
+  }
+
+  html += `<div style="font-size:.7rem;color:var(--muted);margin-top:16px;padding:12px;background:var(--hi);border-radius:6px">
+    ℹ️ Cyberbob ansvarar inte för innehållet på externa sidor. Spela ansvarsfullt — Stödlinjen: 020-81 91 00
+  </div></div>`;
+
+  document.getElementById('tipsContent').innerHTML = html;
+}
+
+// ── HÄMTA ─────────────────────────────────────────────────
 async function triggerFetch(){
   const datum = document.getElementById('fetchDate').value;
   if(!datum){alert('Välj ett datum');return;}
