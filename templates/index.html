@@ -935,10 +935,10 @@ async function laddaAI(){
     html+=`</tbody></table></div>`;
   }
   window._aiKuponger=d.kuponger; window._aiDatum=d.datum;
-  html+=`<div style="display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap">
-    <button onclick="exporteraXML(window._aiKuponger,window._aiDatum)" class="btn green">📥 Ladda ned ATG XML-fil</button>
-    <span style="font-size:.7rem;color:var(--muted)">atg.se → Spela reducerat → Filinlämning → välj XML-fil</span>
-  </div>
+  html+='<div style="display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap">'
+    +'<button onclick="exporteraXML(window._aiKuponger,window._aiDatum)" class="btn green">📥 Ladda ned ATG XML-fil</button>'
+    +'<span style="font-size:.7rem;color:var(--muted)">atg.se → Spela reducerat → Filinlämning → välj XML-fil</span>'
+    +'</div>';
   const redBeskr = {
     rotation: 'Rotation — kupong N tar rank N+1 extra per lopp',
     bred: 'Bred — tar hästar tills 70% historisk täckning uppnås per lopp',
@@ -947,12 +947,11 @@ async function laddaAI(){
     andelssystem: 'Andelssystem — hästar delas i lika stora sektorer',
     minsta: 'Minsta system — maximerar AI-täckning per krona'
   };
-  html += `<div style="font-size:.7rem;color:var(--muted);margin-top:10px;line-height:1.7;background:var(--hi);border-radius:6px;padding:10px 13px">
-    <strong>Strategi:</strong> ${strategi==='säker'?'Säker (70% ATG-vikt)':strategi==='värde'?'Värde (letar undervärderade hästar)':'Balanserad (50/50 ATG + historik)'}<br>
-    <strong>Reducering:</strong> ${redBeskr[reduktion]||reduktion}<br>
-    <strong>AI-poäng</strong> = viktad kombination av live ATG-% och historisk vinstfrekvens per rank.
-    Hästar med poäng under 5 är sällan statistiskt motiverade — överväg att ta bort dem manuellt.
-  </div>`;
+  html += '<div style="font-size:.7rem;color:var(--muted);margin-top:10px;line-height:1.7;background:var(--hi);border-radius:6px;padding:10px 13px">'
+    + '<strong>Strategi:</strong> ' + (strategi==='säker'?'Säker (70% ATG-vikt)':strategi==='värde'?'Värde (letar undervärderade hästar)':'Balanserad (50/50 ATG + historik)') + '<br>'
+    + '<strong>Reducering:</strong> ' + (redBeskr[reduktion]||reduktion) + '<br>'
+    + '<strong>AI-poäng</strong> = viktad kombination av live ATG-% och historisk vinstfrekvens per rank. '
+    + 'Hästar med poäng under 5 är sällan statistiskt motiverade.</div>';
   el.innerHTML=html;
 }
 
@@ -964,40 +963,50 @@ async function exporteraXML(kuponger,datum){
   const res=await fetch('/api/exportera-xml',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kuponger,speltyp:'V85',datum:datum||new Date().toISOString().slice(0,10),max_hastar:maxNr})});
   if(!res.ok){alert('Kunde inte generera XML-fil');return;}
   const blob=await res.blob();const url=URL.createObjectURL(blob);const a=document.createElement('a');
-  a.href=url;a.download=`V85_${datum||'system'}_Cyberbob.xml`;a.click();URL.revokeObjectURL(url);
+  a.href=url;a.download='V85_'+(datum||'system')+'_Cyberbob.xml';a.click();URL.revokeObjectURL(url);
 }
 
 // ── TIPS & LÄNKAR ──────────────────────────────────────────
 function laddaTips(){
   const links=[
-    {kategori:"🏇 Tips & Analys",sidor:[
-      {namn:"TravsportSverige",url:"https://www.travsport.se",beskr:"Officiell travstatistik, startlistor och resultat"},
-      {namn:"ATG Speltips",url:"https://www.atg.se/spel/tips",beskr:"ATGs egna speltips och analyser"},
-      {namn:"Sulkysport",url:"https://www.sulkysport.se",beskr:"Nyheter, analyser och tips för trav"},
-      {namn:"Travronden",url:"https://www.travronden.se",beskr:"Travtidning med djupgående analyser"},
+    {k:"🏇 Tips och Analys",s:[
+      {n:"TravsportSverige",u:"https://www.travsport.se",b:"Officiell travstatistik, startlistor och resultat"},
+      {n:"ATG Speltips",u:"https://www.atg.se/spel/tips",b:"ATGs egna speltips och analyser"},
+      {n:"Sulkysport",u:"https://www.sulkysport.se",b:"Nyheter, analyser och tips för trav"},
+      {n:"Travronden",u:"https://www.travronden.se",b:"Travtidning med djupgående analyser"},
     ]},
-    {kategori:"📊 Statistik & Odds",sidor:[
-      {namn:"ATG Live V85",url:"https://www.atg.se/spel/V85",beskr:"Live spelprocent och odds för kommande V85"},
-      {namn:"TravsportSverige Statistik",url:"https://www.travsport.se/statistik",beskr:"Häst- och kuskstatistik"},
+    {k:"📊 Statistik och Odds",s:[
+      {n:"ATG Live V85",u:"https://www.atg.se/spel/V85",b:"Live spelprocent och odds för kommande V85"},
+      {n:"TravsportSverige Statistik",u:"https://www.travsport.se/statistik",b:"Häst- och kuskstatistik"},
     ]},
-    {kategori:"🎯 Systemverktyg",sidor:[
-      {namn:"ATG Systemspel",url:"https://www.atg.se/spel/system",beskr:"ATGs eget systemspelsverktyg"},
-      {namn:"Trotto",url:"https://www.trotto.se",beskr:"Travtips och systemhjälp"},
+    {k:"🎯 Systemverktyg",s:[
+      {n:"ATG Systemspel",u:"https://www.atg.se/spel/system",b:"ATGs eget systemspelsverktyg"},
+      {n:"Trotto",u:"https://www.trotto.se",b:"Travtips och systemhjälp"},
     ]},
-    {kategori:"📺 Streaming",sidor:[
-      {namn:"ATG Play",url:"https://www.atg.se/play",beskr:"Livestream av travlopp"},
-      {namn:"TravsportSverige TV",url:"https://tv.travsport.se",beskr:"Direktsändningar och repriser"},
+    {k:"📺 Streaming",s:[
+      {n:"ATG Play",u:"https://www.atg.se/play",b:"Livestream av travlopp"},
+      {n:"TravsportSverige TV",u:"https://tv.travsport.se",b:"Direktsändningar och repriser"},
     ]},
   ];
-  let html='<div style="max-width:800px"><div class="info" style="margin-bottom:18px">Klicka för att öppna i ny flik.</div>';
-  for(const kat of links){
-    html+=`<div class="sec">${kat.kategori}</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:9px;margin-bottom:14px">`;
-    for(const s of kat.sidor){
-      html+=`<a href="${s.url}" target="_blank" rel="noopener" style="display:block;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:13px 15px;text-decoration:none;transition:border-color .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'"><div style="font-weight:600;color:var(--text);margin-bottom:3px">${s.namn} ↗</div><div style="font-size:.74rem;color:var(--muted)">${s.beskr}</div></a>`;
+  var html='<div style="max-width:800px">';
+  html+='<div class="info" style="margin-bottom:18px">Klicka för att öppna i ny flik.</div>';
+  for(var i=0;i<links.length;i++){
+    var kat=links[i];
+    html+='<div class="sec">'+kat.k+'</div>';
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:9px;margin-bottom:14px">';
+    for(var j=0;j<kat.s.length;j++){
+      var s=kat.s[j];
+            html+='<a href="'+s.u+'" target="_blank" rel="noopener"'
+        +' style="display:block;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:13px 15px;text-decoration:none;cursor:pointer">';
+      html+='<div style="font-weight:600;color:var(--text);margin-bottom:3px">'+s.n+' ↗</div>';
+      html+='<div style="font-size:.74rem;color:var(--muted)">'+s.b+'</div>';
+      html+='</a>';
     }
-    html+=`</div>`;
+    html+='</div>';
   }
-  html+=`<div style="font-size:.68rem;color:var(--muted);margin-top:14px;padding:11px 13px;background:var(--hi);border-radius:6px">ℹ️ Cyberbob ansvarar inte för externa sidor. Spela ansvarsfullt — Stödlinjen: 020-81 91 00</div></div>`;
+  html+='<div style="font-size:.68rem;color:var(--muted);margin-top:14px;padding:11px 13px;background:var(--hi);border-radius:6px">';
+  html+='ℹ️ Cyberbob ansvarar inte för externa sidor. Spela ansvarsfullt — Stödlinjen: 020-81 91 00';
+  html+='</div></div>';
   document.getElementById('tipsContent').innerHTML=html;
 }
 
@@ -1010,9 +1019,28 @@ async function loadStatistik(){
   renderUtd(rows);
 }
 function renderUtd(rows){
-  document.getElementById('utdBody').innerHTML=rows.length
-    ?rows.map(r=>{const cls=r.utdelning_8>1e6?'big':r.utdelning_8>3e5?'mid':'low';return`<tr><td class="mono">${r.datum}</td><td>${r.bana||'—'}</td><td class="r mono ${cls}">${fmtKr(r.utdelning_8)}</td><td class="r mono">${r.vinnare_8??'—'}</td><td class="r mono">${fmtKr(r.utdelning_7)}</td><td class="r mono">${fmtKr(r.utdelning_6)}</td><td>${r.jackpot_5?'<span style="color:var(--accent)">★ Jackpot</span>':'—'}</td><td class="r mono">${fmt(r.omsattning)}</td></tr>`;}).join('')
-    :'<tr><td colspan="8" style="color:var(--muted);text-align:center;padding:20px">Ingen data</td></tr>';
+  var tb = document.getElementById('utdBody');
+  if(!rows||!rows.length){
+    tb.innerHTML='<tr><td colspan="8" style="color:var(--muted);text-align:center;padding:20px">Ingen data</td></tr>';
+    return;
+  }
+  var html='';
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i];
+    var cls=r.utdelning_8>1e6?'big':r.utdelning_8>3e5?'mid':'low';
+    var jpCell=r.jackpot_5?'<span style="color:var(--accent)">★ Jackpot</span>':'—';
+    html+='<tr>';
+    html+='<td class="mono">'+r.datum+'</td>';
+    html+='<td>'+(r.bana||'—')+'</td>';
+    html+='<td class="r mono '+cls+'">'+fmtKr(r.utdelning_8)+'</td>';
+    html+='<td class="r mono">'+(r.vinnare_8!=null?r.vinnare_8:'—')+'</td>';
+    html+='<td class="r mono">'+fmtKr(r.utdelning_7)+'</td>';
+    html+='<td class="r mono">'+fmtKr(r.utdelning_6)+'</td>';
+    html+='<td>'+jpCell+'</td>';
+    html+='<td class="r mono">'+fmt(r.omsattning)+'</td>';
+    html+='</tr>';
+  }
+  tb.innerHTML=html;
 }
 
 // ── HÄMTA ──────────────────────────────────────────────────
