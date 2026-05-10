@@ -803,23 +803,21 @@ def api_reducerat():
         "n_kupong": n_kupong,
     })
 
-
 @app.route("/api/ai-system")
 def api_ai_system():
     """
-    AI-byggt V85-system baserat på:
-    1. Live ATG-spelprocent (favorit = mest spelad)
-    2. Historisk vinstfrekvens per rank
-    3. Budget-optimering
+    AI-byggt V85-system med valbar reduktionsmetod.
     """
     import requests as req, time
     from datetime import date, timedelta
+    from collections import defaultdict
 
-    budget       = float(request.args.get("budget", 200))
-    pris         = float(request.args.get("pris", 0.5))
-    n_kupong     = int(request.args.get("kuponger", 2))
-    strategi     = request.args.get("strategi", "balanserad")
-    # strategi: "säker" (favoriter), "balanserad", "värde" (odds/chans)
+    budget      = float(request.args.get("budget", 200))
+    pris        = float(request.args.get("pris", 0.5))
+    n_kupong    = int(request.args.get("kuponger", 2))
+    strategi    = request.args.get("strategi", "balanserad")
+    reduktion   = request.args.get("reduktion", "rotation")
+    # reduktion: rotation | bank | halvgardering | andelssystem | minsta
 
     H = {"Accept":"application/json","User-Agent":"Mozilla/5.0",
          "Origin":"https://www.atg.se","Referer":"https://www.atg.se/spel/V85"}
@@ -843,24 +841,20 @@ def api_ai_system():
     for lnr in [3,4,5,6,2,7,1,8]:
         for track in tracks:
             tid = track.get("id")
-            if not tid or tid in UTLANDSKA:
-                continue
+            if not tid or tid in UTLANDSKA: continue
             gid = f"V85_{dag}_{tid}_{lnr}"
             try:
                 g = req.get(f"{BET}/games/{gid}", headers=H, timeout=8).json()
                 time.sleep(0.2)
                 if g and isinstance(g, dict) and g.get("id"):
-                    game = g
-                    break
-            except:
-                pass
-        if game:
-            break
+                    game = g; break
+            except: pass
+        if game: break
 
     if not game:
         return jsonify({"error": f"Ingen V85 hittad för {dag}"}), 404
 
-    # Hämta historisk rankstatistik
+    # Historisk rankstatistik
     stat_raw = q("""
         SELECT COALESCE(l.v85_leg, l.nummer) as lopp_nr,
                h.v85_rank, COUNT(*) as tot, SUM(h.v85_vinnare) as vann
@@ -870,17 +864,13 @@ def api_ai_system():
         GROUP BY lopp_nr, h.v85_rank ORDER BY lopp_nr, h.v85_rank
     """)
 
-    # Bygg kumulativ historisk vinstprocent per lopp
-    from collections import defaultdict
     hist = defaultdict(dict)
     hist_tot = defaultdict(int)
     for r in stat_raw:
-        hist[r["lopp_nr"]][r["v85_rank"]] = {
-            "vann": r["vann"] or 0, "tot": r["tot"]
-        }
+        hist[r["lopp_nr"]][r["v85_rank"]] = {"vann": r["vann"] or 0, "tot": r["tot"]}
         hist_tot[r["lopp_nr"]] = max(hist_tot[r["lopp_nr"]], r["tot"])
 
-    # Bygg AI-score per häst per lopp
+    # Bygg häst-lista per lopp med AI-poäng
     lopp_scores = {}
     for i, race in enumerate(game.get("races", []), 1):
         rid = race.get("id")
@@ -893,11 +883,9 @@ def api_ai_system():
 
         struktna = set(race.get("result", {}).get("scratchings", []))
         hastar = []
-
         for s in starts:
             nr = s.get("number")
-            if nr in struktna:
-                continue
+            if nr in struktna: continue
             horse  = s.get("horse", {}) or {}
             driver = s.get("driver", {}) or {}
             pools  = s.get("pools", {}) or {}
@@ -908,7 +896,6 @@ def api_ai_system():
                 if isinstance(p, dict):
                     sp_pct = p.get("betDistribution") or p.get("percentage")
                     if sp_pct: break
-
             odds = None
             for pk in ["vinnare","win"]:
                 p = pools.get(pk, {})
@@ -917,111 +904,324 @@ def api_ai_system():
                     if odds: break
 
             kusk = (driver.get("firstName","") + " " + driver.get("lastName","")).strip()
-            hastar.append({
-                "nr": nr,
-                "namn": horse.get("name",""),
-                "kusk": kusk,
-                "sp_pct": sp_pct or 0,
-                "odds": odds,
-            })
+            hastar.append({"nr": nr, "namn": horse.get("name",""), "kusk": kusk,
+                           "sp_pct": sp_pct or 0, "odds": odds})
 
-        # Sortera efter spelprocent → ge rank
-        hastar_s = sorted(hastar, key=lambda h: -(h["sp_pct"] or 0))
+        # Sortera efter spelprocent → rank
+        # Sortera initialt efter sp_pct (ATG%) om tillgänglig, annars startnr
+        har_atg_pct = any(h["sp_pct"] > 0 for h in hastar)
+        
+        if har_atg_pct:
+            hastar_s = sorted(hastar, key=lambda h: -(h["sp_pct"] or 0))
+        else:
+            # Ingen ATG-% tillgänglig ännu — sortera efter odds om finns, annars startnr
+            har_odds = any(h["odds"] and h["odds"] > 0 for h in hastar)
+            if har_odds:
+                hastar_s = sorted(hastar, key=lambda h: h["odds"] or 999)
+            else:
+                hastar_s = sorted(hastar, key=lambda h: h["nr"])
+
         for rank, h in enumerate(hastar_s, 1):
             h["rank"] = rank
-            # Historisk vinstchans för denna rank i detta lopp
             hdata = hist[i].get(rank, {})
             htot  = hist_tot[i] or 1
             hist_pct = (hdata.get("vann",0) / htot * 100) if hdata else 0
+            sp = h["sp_pct"] or 0
+            odds = h["odds"] or 0
 
-            # AI-poäng: kombination av live-% och historik
-            if strategi == "säker":
-                # Favoriter — vikta ATG-% tungt
-                score = (h["sp_pct"] or 0) * 0.7 + hist_pct * 0.3
-            elif strategi == "värde":
-                # Värdebet — belöna hög historisk chans relativt låg ATG-%
-                sp = h["sp_pct"] or 0.1
-                score = hist_pct * 0.6 + (hist_pct / sp if sp > 0 else 0) * 40 * 0.4
-            else:  # balanserad
-                score = (h["sp_pct"] or 0) * 0.5 + hist_pct * 0.5
+            # Beräkna AI-score baserat på tillgänglig data
+            if har_atg_pct and sp > 0:
+                if strategi == "säker":
+                    score = sp * 0.75 + hist_pct * 0.25
+                elif strategi == "värde":
+                    # Värde: hög historik men låg ATG = undervärderad
+                    ratio = (hist_pct / max(sp, 0.5)) * 5
+                    score = hist_pct * 0.5 + ratio * 0.5
+                elif strategi == "bred":
+                    # Bred: ta med fler hästar, vikta mot fältstorlek
+                    score = hist_pct * 0.6 + sp * 0.4
+                else:  # balanserad
+                    score = sp * 0.5 + hist_pct * 0.5
+            elif odds > 0:
+                # Använd odds: lägre odds = troligare vinnare
+                odds_score = max(0, 100 - odds * 5)
+                score = odds_score * 0.4 + hist_pct * 0.6
+            else:
+                # Bara historik + rankordning
+                rank_penalty = max(0, 10 - rank)  # favorisera tidiga starter
+                score = hist_pct * 0.7 + rank_penalty * 0.3
 
             h["hist_pct"] = round(hist_pct, 1)
             h["ai_score"] = round(score, 1)
+            h["har_atg_pct"] = har_atg_pct
 
-        # Sortera på AI-score
         hastar_s.sort(key=lambda h: -h["ai_score"])
+        # Lägg till kumulativ täckning
+        kum = 0
+        tot = hist_tot[i] or 1
+        for h in hastar_s:
+            hd = hist[i].get(h["rank"], {})
+            kum += hd.get("vann", 0)
+            h["kum_tackning"] = round(kum / tot * 100, 1)
         lopp_scores[i] = hastar_s
 
-    # Bygg kuponger utifrån budget
+    # ── REDUCERINGSALGORITMER ─────────────────────────────
     budget_per = budget / n_kupong
-    max_rader  = int(budget_per / pris)
+    max_rader  = max(int(budget_per / pris), 1)
 
     def raeder(val):
         r = 1
-        for v in val.values(): r *= max(len(v),1)
+        for v in val.values(): r *= max(len(v), 1)
         return r
 
-    kuponger = []
-    for k in range(n_kupong):
+    def optimal_fyll(basis_per_lopp, budget_rad):
+        """
+        Greedy marginal-optimering:
+        Börja med 1 häst per lopp (bäst AI-score).
+        Lägg till hästen som ger störst täckningsökning per extra rad.
+        Upprepa tills budget slut.
+        Garanterar jämn fördelning — inga spikare om budget tillåter.
+        """
         val = {}
         for l in range(1, 9):
-            hastar_l = lopp_scores.get(l, [])
-            if not hastar_l:
-                val[l] = [1]; continue
+            hs = lopp_scores.get(l, [])
+            # Börja med basis-hästen (kan vara 1 eller 2 beroende på reduktion)
+            val[l] = list(basis_per_lopp.get(l, []))
+            if not val[l] and hs:
+                val[l] = [hs[0]["nr"]]
 
-            # Alltid ta rank 1 (favorit enligt AI)
-            val[l] = [hastar_l[0]["nr"]]
+        def marginal_gain(l):
+            """Täckningsökning per extra rad om vi lägger till nästa häst i lopp l."""
+            hs = lopp_scores.get(l, [])
+            nasta = next((h for h in hs if h["nr"] not in val[l]), None)
+            if not nasta: return -1, None
+            curr_r = raeder(val)
+            test = {ll: list(v) for ll, v in val.items()}
+            test[l] = list(val[l]) + [nasta["nr"]]
+            ny_r = raeder(test)
+            if ny_r * pris > budget_rad: return -1, None
+            extra_rader = max(ny_r - curr_r, 1)
+            # Gain = AI-score / extra rader (normaliserat)
+            gain = nasta["ai_score"] / extra_rader
+            return gain, nasta["nr"]
 
-            # Lägg till fler hästar baserat på kupong-rotation
-            # Kupong 0: lägg till rank 2 om budget
-            # Kupong 1: lägg till rank 3 om budget
-            # etc.
-            extra_rank = k + 2
-            for h in hastar_l[1:]:
-                if h["rank"] <= extra_rank + 1:
+        # Iterera: välj alltid det lopp som ger bäst gain per rad
+        for _ in range(200):  # max 200 iterationer
+            bast_l, bast_gain, bast_nr = None, -1, None
+            for l in range(1, 9):
+                gain, nr = marginal_gain(l)
+                if gain > bast_gain:
+                    bast_gain, bast_l, bast_nr = gain, l, nr
+            if bast_l is None or bast_gain <= 0:
+                break
+            val[bast_l].append(bast_nr)
+
+        return val
+
+    def greedy_fyll(val, max_r, lopp_prio=None, min_tackning=None):
+        """
+        Fyll system med fler hästar tills max_r nås.
+        min_tackning: om satt, se till att varje lopp täcker minst X% historiskt.
+        """
+        # Första: säkerställ minsta täckning per lopp om satt
+        if min_tackning:
+            for l in range(1, 9):
+                hs = lopp_scores.get(l, [])
+                for h in hs:
+                    if h["nr"] in val[l]: continue
+                    if h.get("kum_tackning", 0) <= min_tackning: break
                     test = {ll: list(v) for ll,v in val.items()}
                     test[l] = list(val[l]) + [h["nr"]]
                     if raeder(test) * pris <= budget_per:
                         val[l].append(h["nr"])
+                    else:
+                        break
 
-        # Fyll upp med greedy inom budget
-        for h_l in sorted(lopp_scores.items(), key=lambda x: -max((h["ai_score"] for h in x[1][1:2]), default=0)):
-            l, hastar_l = h_l
-            for h in hastar_l:
-                if h["nr"] in val[l]: continue
-                test = {ll: list(v) for ll,v in val.items()}
-                test[l] = list(val[l]) + [h["nr"]]
-                if raeder(test) * pris <= budget_per:
-                    val[l].append(h["nr"])
-                else:
-                    break
+        # Sedan: fyll med bästa gain per rad
+        prioritet = lopp_prio or sorted(range(1,9),
+            key=lambda l: -(lopp_scores.get(l,[{}]*2)[1]["ai_score"]
+                            if len(lopp_scores.get(l,[])) > 1 else 0))
+        changed = True
+        while changed:
+            changed = False
+            for l in prioritet:
+                hs = lopp_scores.get(l, [])
+                for h in hs:
+                    if h["nr"] in val[l]: continue
+                    test = {ll: list(v) for ll,v in val.items()}
+                    test[l] = list(val[l]) + [h["nr"]]
+                    if raeder(test) * pris <= budget_per:
+                        val[l].append(h["nr"])
+                        changed = True
+                    else:
+                        break
+        return val
 
-        kuponger.append({
-            "kupong": k+1,
-            "rader": raeder(val),
-            "kostnad": round(raeder(val)*pris, 2),
-            "lopp": {str(l): {
+    kuponger = []
+
+    if reduktion == "bank":
+        # BANK: en häst per lopp är låst (rank 1), resten varieras
+        for k in range(n_kupong):
+            val = {}
+            for l in range(1, 9):
+                hs = lopp_scores.get(l, [])
+                # Alltid rank 1 (banken)
+                val[l] = [hs[0]["nr"]] if hs else [1]
+                # Lägg till extra hästar baserat på kupong-nr
+                if len(hs) > 1:
+                    extra = hs[k+1] if k+1 < len(hs) else None
+                    if extra:
+                        test = {ll: list(v) for ll,v in val.items()}
+                        test[l] = list(val[l]) + [extra["nr"]]
+                        if raeder(test) * pris <= budget_per:
+                            val[l].append(extra["nr"])
+            greedy_fyll(val, max_rader)
+            kuponger.append(val)
+
+    elif reduktion == "halvgardering":
+        # HALVGARDERING: häst X med i exakt hälften av kupongerna
+        for k in range(n_kupong):
+            val = {}
+            for l in range(1, 9):
+                hs = lopp_scores.get(l, [])
+                val[l] = [hs[0]["nr"]] if hs else [1]  # rank 1 alltid med
+                if len(hs) > 1:
+                    # Halvgardering: rank 2 i jämna kuponger, rank 3 i ojämna
+                    halvg = hs[1 if k % 2 == 0 else 2] if (k%2==1 and len(hs)>2) else (hs[1] if len(hs)>1 else None)
+                    if halvg:
+                        test = {ll: list(v) for ll,v in val.items()}
+                        test[l] = list(val[l]) + [halvg["nr"]]
+                        if raeder(test)*pris <= budget_per:
+                            val[l].append(halvg["nr"])
+            greedy_fyll(val, max_rader)
+            kuponger.append(val)
+
+    elif reduktion == "andelssystem":
+        # ANDELSSYSTEM: lika stora delar, varje kupong täcker en "sektor"
+        for k in range(n_kupong):
+            val = {}
+            for l in range(1, 9):
+                hs = lopp_scores.get(l, [])
+                val[l] = [hs[0]["nr"]] if hs else [1]
+                # Välj hästar i "ring" baserat på kupong-nr
+                sektor_start = 1 + (k * len(hs) // n_kupong)
+                sektor_slut  = 1 + ((k+1) * len(hs) // n_kupong)
+                for rank in range(sektor_start, sektor_slut):
+                    if rank < len(hs):
+                        h = hs[rank]
+                        if h["nr"] not in val[l]:
+                            test = {ll: list(v) for ll,v in val.items()}
+                            test[l] = list(val[l]) + [h["nr"]]
+                            if raeder(test)*pris <= budget_per:
+                                val[l].append(h["nr"])
+            kuponger.append(val)
+
+    elif reduktion == "minsta":
+        # MINSTA SYSTEM: hitta minsta möjliga system med önskad täckning per kupong
+        for k in range(n_kupong):
+            val = {l: [lopp_scores[l][0]["nr"]] if lopp_scores.get(l) else [1] for l in range(1,9)}
+            # Lägg till hästar som ger mest täckning per extra rad
+            while raeder(val) * pris < budget_per * 0.9:  # nyttja 90% av budget
+                bast_l, bast_gain = None, -1
+                for l in range(1, 9):
+                    hs = lopp_scores.get(l, [])
+                    nasta = next((h for h in hs if h["nr"] not in val[l]), None)
+                    if not nasta: continue
+                    test = {ll: list(v) for ll,v in val.items()}
+                    test[l] = list(val[l]) + [nasta["nr"]]
+                    if raeder(test)*pris > budget_per: continue
+                    curr_pct = sum(h["ai_score"] for h in hs if h["nr"] in val[l])
+                    new_pct  = curr_pct + nasta["ai_score"]
+                    extra    = raeder(test) - raeder(val)
+                    gain     = nasta["ai_score"] / max(extra, 1)
+                    if gain > bast_gain:
+                        bast_gain = gain; bast_l = l
+                if bast_l is None: break
+                hs = lopp_scores.get(bast_l, [])
+                nasta = next((h for h in hs if h["nr"] not in val[bast_l]), None)
+                if nasta: val[bast_l].append(nasta["nr"])
+                else: break
+            kuponger.append(val)
+
+    elif reduktion == "bred":
+        # BRED: ta top-40-50% av fältet i varje lopp, reducera sedan
+        for k in range(n_kupong):
+            val = {}
+            for l in range(1, 9):
+                hs = lopp_scores.get(l, [])
+                # Ta hästar tills kumulativ täckning >= 70% (eller budget tar slut)
+                val[l] = []
+                for h in hs:
+                    if not val[l]:
+                        val[l] = [h["nr"]]  # alltid minst 1
+                        continue
+                    test = {ll: list(v) for ll,v in val.items()}
+                    test[l] = list(val[l]) + [h["nr"]]
+                    if raeder(test) * pris <= budget_per:
+                        val[l].append(h["nr"])
+                        if h.get("kum_tackning", 0) >= 70:
+                            break
+                    else:
+                        break
+                if not val[l]: val[l] = [hs[0]["nr"]] if hs else [1]
+            greedy_fyll(val, max_rader)
+            kuponger.append(val)
+
+    else:  # rotation (default)
+        for k in range(n_kupong):
+            val = {}
+            for l in range(1, 9):
+                hs = lopp_scores.get(l, [])
+                val[l] = [hs[0]["nr"]] if hs else [1]
+                # Rotera: kupong k tar rank k+2
+                if len(hs) > k+1:
+                    h_extra = hs[k+1]
+                    test = {ll: list(v) for ll,v in val.items()}
+                    test[l] = list(val[l]) + [h_extra["nr"]]
+                    if raeder(test)*pris <= budget_per:
+                        val[l].append(h_extra["nr"])
+            greedy_fyll(val, max_rader)
+            kuponger.append(val)
+
+    # Bygg resultat
+    resultat = []
+    for idx, val in enumerate(kuponger):
+        r = raeder(val)
+        diff = {}
+        if idx > 0:
+            prev = kuponger[idx-1]
+            for l in range(1,9):
+                added   = [n for n in val[l] if n not in prev[l]]
+                removed = [n for n in prev[l] if n not in val[l]]
+                if added or removed: diff[l] = {"added":added,"removed":removed}
+
+        lopp_info = {}
+        for l in range(1,9):
+            hs = lopp_scores.get(l, [])
+            lopp_info[str(l)] = {
                 "hastar": sorted(val[l]),
-                "antal": len(val[l]),
+                "antal":  len(val[l]),
                 "top_hastar": [{
-                    "nr": h["nr"], "namn": h["namn"], "kusk": h["kusk"],
-                    "sp_pct": h["sp_pct"], "hist_pct": h["hist_pct"],
-                    "ai_score": h["ai_score"], "rank": h["rank"],
-                    "med": h["nr"] in val[l]
-                } for h in lopp_scores.get(l,[])[:6]]
-            } for l in range(1,9)},
-        })
+                    "nr":h["nr"],"namn":h["namn"],"kusk":h["kusk"],
+                    "sp_pct":h["sp_pct"],"hist_pct":h["hist_pct"],
+                    "ai_score":h["ai_score"],"rank":h["rank"],
+                    "med":h["nr"] in val[l]
+                } for h in hs[:8]],
+                "diff": diff.get(l,{})
+            }
+        resultat.append({"kupong":idx+1,"rader":r,"kostnad":round(r*pris,2),"lopp":lopp_info})
 
     return jsonify({
         "datum": str(dag),
         "strategi": strategi,
+        "reduktion": reduktion,
         "budget": budget,
         "pris": pris,
         "n_kupong": n_kupong,
-        "kuponger": kuponger,
-        "total_rader": sum(k["rader"] for k in kuponger),
-        "total_kostnad": round(sum(k["kostnad"] for k in kuponger), 2),
-        "hist_omgangar": hist_tot.get(1, 0),
+        "kuponger": resultat,
+        "total_rader": sum(k["rader"] for k in resultat),
+        "total_kostnad": round(sum(k["kostnad"] for k in resultat),2),
+        "hist_omgangar": hist_tot.get(1,0),
     })
 
 

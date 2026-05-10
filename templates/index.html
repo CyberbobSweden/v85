@@ -268,7 +268,7 @@ select{background:var(--hi);color:var(--text);border:1px solid var(--border);bor
 
 <!-- SYSTEMFÖRSLAG -->
 <div class="page" id="page-systemforslag">
-  <div class="info">Ange budget — AI räknar ut optimalt system baserat på historisk statistik.</div>
+  <div class="info">Systemförslag baseras på <strong>historisk statistik</strong> från alla sparade V85-omgångar — fungerar alltid, oavsett om nästa lördags spel är publicerat eller inte.</div>
   <div class="filter-bar">
     <span class="filter-label">Budget:</span>
     <input type="number" id="sfBudget" value="200" min="10" step="50" style="background:var(--hi);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:5px 9px;width:90px;font-family:'DM Sans',sans-serif;font-size:.74rem">
@@ -774,7 +774,15 @@ async function laddaKommande(){
   kommABC={};
   const d=await fetch(`/api/kommande?typ=${typ}`).then(r=>r.json()).catch(()=>null);
   if(!d||d.error){
-    document.getElementById('kommContent').innerHTML=`<div class="err">⚠ ${d?.error||'Kunde inte hämta data'}</div><div class="info" style="margin-top:10px">V85 körs på lördagar. Uppdatera närmre tävlingen.</div>`;
+    var msg=d?.error||'Inget V85-spel hittades';
+    document.getElementById('kommContent').innerHTML=
+      '<div class="err">⚠ '+msg+'</div>'
+      +'<div class="info" style="margin-top:10px">'
+      +'<strong>När finns V85-data tillgänglig?</strong><br><br>'
+      +'📅 <strong>Startlistor</strong> — publiceras oftast onsdag–torsdag veckan innan<br>'
+      +'💰 <strong>Spelprocent (ATG%)</strong> — öppnar ~1–2 timmar innan första lopp<br><br>'
+      +'Prova att uppdatera närmre lördag. Hästnamnen brukar synas från onsdag.'
+      +'</div>';
     document.getElementById('kommInfo').textContent='';return;
   }
   kommData=d;
@@ -891,7 +899,17 @@ async function laddaAI(){
   el.innerHTML='<div class="loading"><div class="spin"></div>AI analyserar hästar och statistik...</div>';
   const reduktion = document.getElementById('aiReduktion')?.value||'rotation';
   const d=await fetch(`/api/ai-system?budget=${budget}&pris=${pris}&kuponger=${kuponger}&strategi=${encodeURIComponent(strategi)}&reduktion=${reduktion}`).then(r=>r.json()).catch(()=>null);
-  if(!d||d.error){el.innerHTML=`<div class="err">⚠ ${d?.error||'Kunde inte hämta. V85 finns på lördagar.'}</div>`;return;}
+  if(!d||d.error){
+    var aiMsg=d?.error||'Inget V85-spel hittades';
+    el.innerHTML='<div class="err">⚠ '+aiMsg+'</div>'
+      +'<div class="info" style="margin-top:10px">'
+      +'<strong>AI-systemet kräver att V85-spelet är publicerat på ATG.</strong><br><br>'
+      +'📅 Startlistor brukar finnas från <strong>onsdag–torsdag</strong><br>'
+      +'💰 Live ATG-procent öppnar <strong>1–2 timmar</strong> innan start på lördagen<br><br>'
+      +'Utan live-procent rankar AI:n hästarna på historisk statistik + odds istället.'
+      +'</div>';
+    return;
+  }
   const mangaHarAtg = d.kuponger[0]?.lopp?.['1']?.top_hastar?.some(h=>h.sp_pct>0);
   if(!mangaHarAtg){
     const warn=document.createElement('div');
