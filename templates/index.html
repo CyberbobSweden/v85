@@ -1082,8 +1082,15 @@ if(cacheAge > 24) { cacheClear(); localStorage.setItem(CACHE_VERSION+'_ts', Date
 const cacheKeys = Object.keys(localStorage).filter(k=>k.startsWith(CACHE_VERSION)).length;
 if(cacheKeys > 0) {
   const statusEl = document.createElement('span');
-  statusEl.style.cssText = 'font-size:.6rem;color:var(--green);font-family:"DM Mono",monospace;opacity:.6';
+  statusEl.style.cssText = 'font-size:.6rem;color:var(--green);font-family:"DM Mono",monospace;opacity:.6;cursor:help';
+  statusEl.title = 'Data är cachad lokalt i webbläsaren — sidan laddar snabbare vid nästa besök. Klicka för att rensa cache.';
   statusEl.textContent = '💾 cache';
+  statusEl.onclick = function(){
+    if(confirm('Rensa lokal cache? Sidan laddar om med färsk data.')){
+      cacheClear();
+      location.reload();
+    }
+  };
   document.querySelector('.nav-top')?.appendChild(statusEl);
 }
 

@@ -908,48 +908,80 @@ def api_ai_system():
                            "sp_pct": sp_pct or 0, "odds": odds})
 
         # Sortera efter spelprocent → rank
-        # Sortera initialt efter sp_pct (ATG%) om tillgänglig, annars startnr
         har_atg_pct = any(h["sp_pct"] > 0 for h in hastar)
-        
+        har_odds    = any(h["odds"] and h["odds"] > 0 for h in hastar)
+
+        # Hämta historisk vinstfrekvens per startnummer för HELA loppet på en gång
+        snr_hist_rows = q("""
+            SELECT h.startnr,
+                   ROUND(100.0*SUM(h.v85_vinnare)/NULLIF(COUNT(*),0),1) as vinstpct,
+                   COUNT(*) as starter
+            FROM hastar h JOIN lopp l ON h.lopp_id=l.id
+            WHERE COALESCE(l.v85_leg,l.nummer)=? AND h.struken=0
+            GROUP BY h.startnr
+        """, (i,))
+        snr_hist = {r["startnr"]: (r["vinstpct"] or 0) for r in snr_hist_rows}
+
+        # Tilldela initial AI-score baserat på tillgänglig data
+        for h in hastar:
+            sp    = h["sp_pct"] or 0
+            odds  = h["odds"] or 0
+            nr    = h["nr"]
+            snr_p = snr_hist.get(nr, 0)  # historisk vinstprocent för detta startnummer
+
+            if har_atg_pct and sp > 0:
+                # Vi har live ATG-% — kombinera med startnr-historik
+                if strategi == "säker":
+                    h["pre_score"] = sp * 0.75 + snr_p * 0.25
+                elif strategi == "värde":
+                    ratio = (snr_p / max(sp, 0.5)) * 5
+                    h["pre_score"] = snr_p * 0.5 + ratio * 0.5
+                else:
+                    h["pre_score"] = sp * 0.55 + snr_p * 0.45
+            elif har_odds and odds > 0:
+                # Odds tillgängliga men inte ATG-%
+                odds_score = max(0, 100 - odds * 3)
+                h["pre_score"] = odds_score * 0.45 + snr_p * 0.55
+            else:
+                # Inget ATG% och inga odds — ENBART startnr-historik
+                # Undviker att låga startnummer får orättvist högt score
+                h["pre_score"] = snr_p
+
+        # Sortera på pre_score → tilldela rank
         if har_atg_pct:
             hastar_s = sorted(hastar, key=lambda h: -(h["sp_pct"] or 0))
+        elif har_odds:
+            hastar_s = sorted(hastar, key=lambda h: h["odds"] or 999)
         else:
-            # Ingen ATG-% tillgänglig ännu — sortera efter odds om finns, annars startnr
-            har_odds = any(h["odds"] and h["odds"] > 0 for h in hastar)
-            if har_odds:
-                hastar_s = sorted(hastar, key=lambda h: h["odds"] or 999)
-            else:
-                hastar_s = sorted(hastar, key=lambda h: h["nr"])
+            # Ingen extern info — sortera på startnr-historik
+            hastar_s = sorted(hastar, key=lambda h: -h["pre_score"])
 
         for rank, h in enumerate(hastar_s, 1):
-            h["rank"] = rank
-            hdata = hist[i].get(rank, {})
-            htot  = hist_tot[i] or 1
-            hist_pct = (hdata.get("vann",0) / htot * 100) if hdata else 0
-            sp = h["sp_pct"] or 0
-            odds = h["odds"] or 0
+            h["rank"]     = rank
+            hdata         = hist[i].get(rank, {})
+            htot          = hist_tot[i] or 1
+            hist_pct      = (hdata.get("vann",0) / htot * 100) if hdata else 0
+            sp            = h["sp_pct"] or 0
+            odds          = h["odds"] or 0
+            snr_p         = snr_hist.get(h["nr"], 0)
 
-            # Beräkna AI-score baserat på tillgänglig data
             if har_atg_pct and sp > 0:
                 if strategi == "säker":
-                    score = sp * 0.75 + hist_pct * 0.25
+                    score = sp * 0.65 + hist_pct * 0.20 + snr_p * 0.15
                 elif strategi == "värde":
-                    # Värde: hög historik men låg ATG = undervärderad
                     ratio = (hist_pct / max(sp, 0.5)) * 5
-                    score = hist_pct * 0.5 + ratio * 0.5
+                    score = hist_pct * 0.35 + ratio * 0.35 + snr_p * 0.30
                 elif strategi == "bred":
-                    # Bred: ta med fler hästar, vikta mot fältstorlek
-                    score = hist_pct * 0.6 + sp * 0.4
-                else:  # balanserad
-                    score = sp * 0.5 + hist_pct * 0.5
-            elif odds > 0:
-                # Använd odds: lägre odds = troligare vinnare
-                odds_score = max(0, 100 - odds * 5)
-                score = odds_score * 0.4 + hist_pct * 0.6
+                    score = hist_pct * 0.40 + sp * 0.30 + snr_p * 0.30
+                else:
+                    score = sp * 0.40 + hist_pct * 0.35 + snr_p * 0.25
+            elif har_odds and odds > 0:
+                odds_score = max(0, 100 - odds * 3)
+                score = odds_score * 0.30 + hist_pct * 0.35 + snr_p * 0.35
             else:
-                # Bara historik + rankordning
-                rank_penalty = max(0, 10 - rank)  # favorisera tidiga starter
-                score = hist_pct * 0.7 + rank_penalty * 0.3
+                # ENBART historisk startnr-data — rank-historik IGNORERAS
+                # (eftersom rank är felaktigt tilldelad utan ATG-%)
+                score = snr_p
 
             h["hist_pct"] = round(hist_pct, 1)
             h["ai_score"] = round(score, 1)
